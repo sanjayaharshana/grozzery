@@ -4349,10 +4349,23 @@ html {
     color: #155724;
 }
 
-.location-info.success p:first-child {
-    color: #155724;
-    font-weight: 600;
-}
+        .location-info.success p:first-child {
+            color: #155724;
+            font-weight: 600;
+        }
+
+        /* Location Modal Description */
+        .location-description {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: center;
+        }
 
 /* Location Modal Styles */
 .location-modal {
