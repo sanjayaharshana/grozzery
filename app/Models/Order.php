@@ -23,6 +23,7 @@ class Order extends Model
         'total_amount',
         'payment_status', // pending, paid, failed, refunded
         'payment_method',
+        'delivery_type', // location_based, address_based
         'shipping_address',
         'billing_address',
         'shipping_method',

@@ -140,7 +140,7 @@ class VendorController extends Controller
         ]);
 
         $vendor = Auth::user()->vendor;
-        
+
         $product = $vendor->products()->create([
             'name' => $request->name,
             'slug' => \Str::slug($request->name),

@@ -7,7 +7,7 @@
     <div class="container">
         <div class="checkout-header">
             <h1>Checkout</h1>
-            <p>Complete your order by selecting your addresses and payment method</p>
+            <p>Complete your order by selecting your delivery option and payment method</p>
         </div>
         
         <form action="{{ route('checkout.store') }}" method="POST" class="checkout-form">
@@ -16,8 +16,38 @@
             <div class="checkout-content">
                 <!-- Checkout Form -->
                 <div class="checkout-form-section">
-                    <!-- Address Selection -->
+                    <!-- Delivery Type Selection -->
                     <div class="form-card">
+                        <h3>Delivery Option</h3>
+                        <div class="delivery-options">
+                            <div class="delivery-option">
+                                <input type="radio" name="delivery_type" id="address_based" value="address_based" checked>
+                                <label for="address_based" class="delivery-card">
+                                    <i class="fas fa-home"></i>
+                                    <div class="option-content">
+                                        <h5>Address-Based Delivery</h5>
+                                        <p>Deliver to your saved addresses</p>
+                                        <span class="shipping-info">Standard shipping: $5.99</span>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="delivery-option">
+                                <input type="radio" name="delivery_type" id="location_based" value="location_based">
+                                <label for="location_based" class="delivery-card">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <div class="option-content">
+                                        <h5>Location-Based Delivery</h5>
+                                        <p>Deliver to any location on the map</p>
+                                        <span class="shipping-info">Dynamic shipping based on distance</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Selection (for address-based delivery) -->
+                    <div id="address-based-section" class="form-card">
                         <h3>Address Selection</h3>
                         
                         <!-- Shipping Address -->
@@ -69,13 +99,6 @@
                                 <button type="button" class="btn btn-outline" onclick="openAddressModal()">
                                     <i class="fas fa-plus"></i> Add New Address
                                 </button>
-                                <button type="button" class="btn btn-outline" onclick="useCurrentLocation()">
-                                    <i class="fas fa-location-arrow"></i> Use Current Location
-                                </button>
-                                <!-- Test button for debugging -->
-                                <button type="button" class="btn btn-primary" onclick="testModal()" style="background: #ff0000;">
-                                    🧪 Test Modal
-                                </button>
                             </div>
                         </div>
 
@@ -120,32 +143,68 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Payment Method -->
-                        <div class="payment-section">
-                            <h4>Payment Method</h4>
-                            <div class="payment-options">
-                                <div class="payment-option">
-                                    <input type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
-                                    <label for="credit_card" class="payment-card">
-                                        <i class="fas fa-credit-card"></i>
-                                        <span>Credit Card</span>
-                                    </label>
-                                </div>
-                                <div class="payment-option">
-                                    <input type="radio" name="payment_method" id="paypal" value="paypal">
-                                    <label for="paypal" class="payment-card">
-                                        <i class="fab fa-paypal"></i>
-                                        <span>PayPal</span>
-                                    </label>
-                                </div>
-                                <div class="payment-option">
-                                    <input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery">
-                                    <label for="cash_on_delivery" class="payment-card">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                        <span>Cash on Delivery</span>
-                                    </label>
-                                </div>
+                    <!-- Location-Based Delivery Section -->
+                    <div id="location-based-section" class="form-card" style="display: none;">
+                        <h3>Delivery Location</h3>
+                        <p class="section-description">Select your delivery location on the map or use your current location. All delivery details will be automatically populated.</p>
+                        
+                        <div class="location-inputs">
+                            <div class="location-info">
+                                <p><strong>Location-based delivery selected</strong></p>
+                                <p>Click "Select on Map" to choose your delivery location, or use "Use Current Location" to automatically detect your position.</p>
+                            </div>
+                            
+                            <!-- Hidden fields that will be populated automatically -->
+                            <input type="hidden" id="delivery_recipient_name" name="delivery_recipient_name">
+                            <input type="hidden" id="delivery_phone" name="delivery_phone">
+                            <input type="hidden" id="delivery_address" name="delivery_address">
+                            <input type="hidden" id="delivery_city" name="delivery_city">
+                            <input type="hidden" id="delivery_state" name="delivery_state">
+                            <input type="hidden" id="delivery_zip_code" name="delivery_zip_code">
+                            <input type="hidden" id="delivery_country" name="delivery_country">
+                            <input type="hidden" id="delivery_latitude" name="delivery_latitude">
+                            <input type="hidden" id="delivery_longitude" name="delivery_longitude">
+                            
+                            <div class="location-actions">
+                                <button type="button" class="btn btn-outline" onclick="openLocationModal()">
+                                    <i class="fas fa-map-marker-alt"></i> Select on Map
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="useCurrentLocation()">
+                                    <i class="fas fa-location-arrow"></i> Use Current Location
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="openLocationModal()">
+                                    <i class="fas fa-map-marker-alt"></i> Choose Location
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="payment-section">
+                        <h4>Payment Method</h4>
+                        <div class="payment-options">
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="credit_card" value="credit_card" checked>
+                                <label for="credit_card" class="payment-card">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span>Credit Card</span>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="paypal" value="paypal">
+                                <label for="paypal" class="payment-card">
+                                    <i class="fab fa-paypal"></i>
+                                    <span>PayPal</span>
+                                </label>
+                            </div>
+                            <div class="payment-option">
+                                <input type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery">
+                                <label for="cash_on_delivery" class="payment-card">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span>Cash on Delivery</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -477,6 +536,77 @@
     </div>
 </div>
 
+<!-- Location Selection Modal for Checkout -->
+<div id="locationModal" class="location-modal">
+    <div class="location-modal-content">
+        <div class="location-modal-header">
+            <h3>Select Delivery Location</h3>
+            <button type="button" class="location-close" onclick="closeLocationModal()">&times;</button>
+        </div>
+        <div class="location-modal-body">
+            <div class="location-search">
+                <input type="text" id="locationSearch" placeholder="Search for an address...">
+                <button type="button" class="btn btn-primary btn-sm" onclick="searchLocation()">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            
+            <div id="locationMap" class="location-map"></div>
+            
+            <div class="location-info">
+                <p id="selectedLocationInfo">Click on the map or search for an address</p>
+            </div>
+            
+            <div class="location-form">
+                <h5>Location Details</h5>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal_delivery_recipient_name">Recipient Name *</label>
+                        <input type="text" id="modal_delivery_recipient_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal_delivery_phone">Phone Number *</label>
+                        <input type="tel" id="modal_delivery_phone" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal_delivery_address">Street Address *</label>
+                        <input type="text" id="modal_delivery_address" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal_delivery_city">City *</label>
+                        <input type="text" id="modal_delivery_city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal_delivery_state">State/Province *</label>
+                        <input type="text" id="modal_delivery_state" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="modal_delivery_zip_code">ZIP/Postal Code *</label>
+                        <input type="text" id="modal_delivery_zip_code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal_delivery_country">Country *</label>
+                        <input type="text" id="modal_delivery_country" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="location-actions">
+                <button type="button" class="btn btn-outline" onclick="closeLocationModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmLocationSelection()">
+                    <i class="fas fa-check"></i> Confirm Location
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 @section('scripts')
@@ -486,6 +616,45 @@
 <script>
 let map, marker, selectedLocation;
 let modalMap, modalMarker, modalAutocomplete, modalSelectedLocation;
+let locationMap, locationMarker, locationSelectedLocation;
+
+// Handle delivery type switching
+document.addEventListener('DOMContentLoaded', function() {
+    const addressBasedRadio = document.getElementById('address_based');
+    const locationBasedRadio = document.getElementById('location_based');
+    const addressSection = document.getElementById('address-based-section');
+    const locationSection = document.getElementById('location-based-section');
+
+    function toggleDeliverySections() {
+        if (addressBasedRadio.checked) {
+            addressSection.style.display = 'block';
+            locationSection.style.display = 'none';
+            // Make address fields required
+            document.querySelectorAll('#address-based-section input[required]').forEach(input => {
+                input.required = true;
+            });
+            // Location fields are hidden, so no need to set required
+        } else {
+            addressSection.style.display = 'none';
+            locationSection.style.display = 'block';
+            // Make address fields not required
+            document.querySelectorAll('#address-based-section input[required]').forEach(input => {
+                input.required = false;
+            });
+            // Location fields are hidden inputs, validation will be handled by the controller
+            
+            // Reset location info to default state
+            resetLocationInfo();
+        }
+    }
+
+    // Add event listeners
+    addressBasedRadio.addEventListener('change', toggleDeliverySections);
+    locationBasedRadio.addEventListener('change', toggleDeliverySections);
+
+    // Initialize on page load
+    toggleDeliverySections();
+});
 
 // Debug: Check if modal exists when page loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -1019,14 +1188,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Use current location (legacy function)
+// Use current location for location-based delivery
 function useCurrentLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
-                openMapModal(lat, lng);
+                
+                // Open location modal and set current position
+                openLocationModal();
+                
+                // Set the location on the map after modal opens
+                setTimeout(() => {
+                    if (locationMap && locationMarker) {
+                        const latLng = new google.maps.LatLng(lat, lng);
+                        setLocationMapPosition(latLng);
+                        reverseGeocodeLocation(latLng);
+                    }
+                }, 200);
             },
             function(error) {
                 alert('Error getting location: ' + error.message);
@@ -1035,6 +1215,266 @@ function useCurrentLocation() {
     } else {
         alert('Geolocation is not supported by this browser.');
     }
+}
+
+// Location Modal Functions
+function openLocationModal() {
+    const modal = document.getElementById('locationModal');
+    if (!modal) return;
+    
+    modal.style.display = 'block';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    modal.style.zIndex = '9999';
+    
+    // Populate recipient name and phone from user's default address if available
+    populateUserInfoInModal();
+    
+    // Initialize location map if not already done
+    setTimeout(() => {
+        if (typeof google !== 'undefined' && google.maps && !locationMap) {
+            initLocationMap();
+        }
+    }, 100);
+}
+
+function closeLocationModal() {
+    const modal = document.getElementById('locationModal');
+    if (!modal) return;
+    
+    modal.style.display = 'none';
+    modal.style.visibility = 'hidden';
+    modal.style.opacity = '0';
+}
+
+function populateUserInfoInModal() {
+    // Try to get user info from the first available address
+    const firstAddress = document.querySelector('#address-based-section .address-option input[type="radio"]:checked');
+    if (firstAddress) {
+        const addressCard = firstAddress.closest('.address-option').querySelector('.address-card');
+        if (addressCard) {
+            const fullName = addressCard.querySelector('strong');
+            const phone = addressCard.querySelector('p:last-child');
+            
+            if (fullName) {
+                const modalRecipientName = document.getElementById('modal_delivery_recipient_name');
+                if (modalRecipientName) {
+                    modalRecipientName.value = fullName.textContent;
+                }
+            }
+            
+            if (phone && phone.textContent.includes('Phone:')) {
+                const modalPhone = document.getElementById('modal_delivery_phone');
+                if (modalPhone) {
+                    modalPhone.value = phone.textContent.replace('Phone:', '').trim();
+                }
+            }
+        }
+    }
+}
+
+function initLocationMap() {
+    const defaultLocation = { lat: 0, lng: 0 };
+    
+    locationMap = new google.maps.Map(document.getElementById('locationMap'), {
+        zoom: 15,
+        center: defaultLocation,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        styles: [
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+            }
+        ]
+    });
+    
+    locationMarker = new google.maps.Marker({
+        position: defaultLocation,
+        map: locationMap,
+        draggable: true,
+        title: 'Drag to adjust location'
+    });
+    
+    // Add click listener to map
+    locationMap.addListener('click', function(event) {
+        setLocationMapPosition(event.latLng);
+        reverseGeocodeLocation(event.latLng);
+    });
+    
+    // Add drag listener to marker
+    locationMarker.addListener('dragend', function(event) {
+        reverseGeocodeLocation(event.latLng);
+    });
+    
+    // Initialize autocomplete for search
+    const searchInput = document.getElementById('locationSearch');
+    if (searchInput) {
+        const autocomplete = new google.maps.places.Autocomplete(searchInput, { types: ['address'] });
+        autocomplete.addListener('place_changed', function() {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                setLocationMapPosition(place.geometry.location);
+                fillLocationAddressFields(place);
+            }
+        });
+    }
+}
+
+function setLocationMapPosition(latLng) {
+    locationMap.setCenter(latLng);
+    locationMarker.setPosition(latLng);
+    locationSelectedLocation = latLng;
+    
+    // Update info display
+    const locationInfo = document.getElementById('selectedLocationInfo');
+    if (locationInfo) {
+        locationInfo.textContent = `Selected: ${latLng.lat().toFixed(6)}, ${latLng.lng().toFixed(6)}`;
+    }
+}
+
+function reverseGeocodeLocation(latLng) {
+    const geocoder = new google.maps.Geocoder();
+    
+    geocoder.geocode({ location: latLng }, function(results, status) {
+        if (status === 'OK' && results[0]) {
+            fillLocationAddressFields(results[0]);
+        }
+    });
+}
+
+function fillLocationAddressFields(place) {
+    let streetNumber = '', route = '', city = '', state = '', zipCode = '', country = '';
+    
+    for (const component of place.address_components) {
+        const type = component.types[0];
+        
+        switch (type) {
+            case 'street_number':
+                streetNumber = component.long_name;
+                break;
+            case 'route':
+                route = component.long_name;
+                break;
+            case 'locality':
+                city = component.long_name;
+                break;
+            case 'administrative_area_level_1':
+                state = component.long_name;
+                break;
+            case 'postal_code':
+                zipCode = component.long_name;
+                break;
+            case 'country':
+                country = component.long_name;
+                break;
+        }
+    }
+    
+    const addressLine1 = `${streetNumber} ${route}`.trim();
+    
+    // Fill modal fields
+    const modalAddress = document.getElementById('modal_delivery_address');
+    const modalCity = document.getElementById('modal_delivery_city');
+    const modalState = document.getElementById('modal_delivery_state');
+    const modalZipCode = document.getElementById('modal_delivery_zip_code');
+    const modalCountry = document.getElementById('modal_delivery_country');
+    
+    if (modalAddress && addressLine1) modalAddress.value = addressLine1;
+    if (modalCity && city) modalCity.value = city;
+    if (modalState && state) modalState.value = state;
+    if (modalZipCode && zipCode) modalZipCode.value = zipCode;
+    if (modalCountry && country) modalCountry.value = country;
+}
+
+function searchLocation() {
+    const searchInput = document.getElementById('locationSearch');
+    const query = searchInput.value.trim();
+    
+    if (query) {
+        const geocoder = new google.maps.Geocoder();
+        
+        geocoder.geocode({ address: query }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                setLocationMapPosition(results[0].geometry.location);
+                fillLocationAddressFields(results[0]);
+            } else {
+                alert('Address not found. Please try a different search term.');
+            }
+        });
+    }
+}
+
+function confirmLocationSelection() {
+    if (!locationSelectedLocation) {
+        alert('Please select a location on the map before confirming.');
+        return;
+    }
+    
+    // Fill the main form fields
+    const deliveryLat = document.getElementById('delivery_latitude');
+    const deliveryLng = document.getElementById('delivery_longitude');
+    const deliveryRecipientName = document.getElementById('delivery_recipient_name');
+    const deliveryPhone = document.getElementById('delivery_phone');
+    const deliveryAddress = document.getElementById('delivery_address');
+    const deliveryCity = document.getElementById('delivery_city');
+    const deliveryState = document.getElementById('delivery_state');
+    const deliveryZipCode = document.getElementById('delivery_zip_code');
+    const deliveryCountry = document.getElementById('delivery_country');
+    
+    if (deliveryLat) deliveryLat.value = locationSelectedLocation.lat();
+    if (deliveryLng) deliveryLng.value = locationSelectedLocation.lng();
+    
+    const modalRecipientName = document.getElementById('modal_delivery_recipient_name');
+    const modalPhone = document.getElementById('modal_delivery_phone');
+    const modalAddress = document.getElementById('modal_delivery_address');
+    const modalCity = document.getElementById('modal_delivery_city');
+    const modalState = document.getElementById('modal_delivery_state');
+    const modalZipCode = document.getElementById('modal_delivery_zip_code');
+    const modalCountry = document.getElementById('modal_delivery_country');
+    
+    if (deliveryRecipientName && modalRecipientName) deliveryRecipientName.value = modalRecipientName.value;
+    if (deliveryPhone && modalPhone) deliveryPhone.value = modalPhone.value;
+    if (deliveryAddress && modalAddress) deliveryAddress.value = modalAddress.value;
+    if (deliveryCity && modalCity) deliveryCity.value = modalCity.value;
+    if (deliveryState && modalState) deliveryState.value = modalState.value;
+    if (deliveryZipCode && modalZipCode) deliveryZipCode.value = modalZipCode.value;
+    if (deliveryCountry && modalCountry) deliveryCountry.value = modalCountry.value;
+    
+    // Show success message
+    showLocationSuccessMessage();
+    
+    // Close modal
+    closeLocationModal();
+}
+
+function showLocationSuccessMessage() {
+    const locationInfo = document.querySelector('#location-based-section .location-info');
+    if (locationInfo) {
+        locationInfo.innerHTML = `
+            <p><strong>✅ Location selected successfully!</strong></p>
+            <p>Your delivery location has been set. You can now proceed with checkout.</p>
+        `;
+        locationInfo.classList.add('success');
+    }
+}
+
+function resetLocationInfo() {
+    const locationInfo = document.querySelector('#location-based-section .location-info');
+    if (locationInfo) {
+        locationInfo.innerHTML = `
+            <p><strong>Location-based delivery selected</strong></p>
+            <p>Click "Select on Map" to choose your delivery location, or use "Use Current Location" to automatically detect your position.</p>
+        `;
+        locationInfo.classList.remove('success');
+    }
+    
+    // Clear hidden fields
+    const hiddenFields = ['delivery_recipient_name', 'delivery_phone', 'delivery_address', 'delivery_city', 'delivery_state', 'delivery_zip_code', 'delivery_country', 'delivery_latitude', 'delivery_longitude'];
+    hiddenFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
 }
 
 // Open map modal
