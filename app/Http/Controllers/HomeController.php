@@ -147,4 +147,24 @@ class HomeController extends Controller
 
         return view('vendor', compact('vendor', 'products'));
     }
+
+    public function vendorContact(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $vendor = Vendor::findOrFail($id);
+
+        // Here you would typically:
+        // 1. Send an email to the vendor
+        // 2. Store the message in a database
+        // 3. Send a confirmation email to the customer
+        
+        // For now, we'll just redirect back with a success message
+        return redirect()->back()->with('success', 'Thank you for your message! We will get back to you soon.');
+    }
 }

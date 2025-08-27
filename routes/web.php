@@ -14,6 +14,7 @@ Route::get('/shop', [HomeController::class, 'shop'])->name('shop');
 Route::get('/product/{slug}', [HomeController::class, 'product'])->name('product');
 Route::get('/category/{slug}', [HomeController::class, 'category'])->name('category');
 Route::get('/vendor/{id}', [HomeController::class, 'vendor'])->name('vendor');
+Route::post('/vendor/{id}/contact', [HomeController::class, 'vendorContact'])->name('vendor.contact');
 
 // Cart routes
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');

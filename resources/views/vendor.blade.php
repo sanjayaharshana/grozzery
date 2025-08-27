@@ -31,15 +31,19 @@
                                 @endif
                             @endfor
                         </span>
-                        <span class="rating-value">{{ number_format($vendor->rating, 1) }}</span>
+                        <span class="rating-value" data-stat="rating">{{ number_format($vendor->rating, 1) }}</span>
                     </div>
                     @endif
                     
                     @if($vendor->total_orders)
                     <div class="vendor-orders">
-                        <span class="orders-count">{{ $vendor->total_orders }} orders</span>
+                        <span class="orders-count" data-stat="orders">{{ $vendor->total_orders }} orders</span>
                     </div>
                     @endif
+                    
+                    <div class="vendor-products-count">
+                        <span class="products-count" data-stat="products">{{ $products->count() }} products</span>
+                    </div>
                 </div>
                 
                 @if($vendor->address || $vendor->city || $vendor->state)
@@ -88,10 +92,51 @@
         <div class="vendor-products">
             <h2 class="section-title">Products from {{ $vendor->business_name }}</h2>
             
+            <!-- Product Filters and Search -->
+            <div class="product-filters" style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                <div class="search-box" style="position: relative; margin-bottom: 1rem;">
+                    <input type="text" id="productSearch" placeholder="Search products..." class="search-input" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                    <i class="fas fa-search search-icon" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #a0aec0;"></i>
+                </div>
+                
+                <div class="filter-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <select id="categoryFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                        <option value="">All Categories</option>
+                        @if(isset($categories) && $categories->count() > 0)
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                    
+                    <select id="priceFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                        <option value="">All Prices</option>
+                        <option value="0-25">$0 - $25</option>
+                        <option value="25-50">$25 - $50</option>
+                        <option value="50-100">$50 - $100</option>
+                        <option value="100+">$100+</option>
+                    </select>
+                    
+                    <select id="sortFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="name">Name A-Z</option>
+                    </select>
+                </div>
+            </div>
+            
             @if($products->count() > 0)
             <div class="products-grid">
                 @foreach($products as $product)
-                <div class="product-card">
+                <div class="product-card" 
+                     data-category="{{ $product->category_id ?? '' }}"
+                     data-price="{{ $product->price }}"
+                     data-rating="{{ $product->rating ?? 0 }}"
+                     data-name="{{ strtolower($product->name) }}"
+                     data-date="{{ $product->created_at ? $product->created_at->timestamp : 0 }}">
                     <div class="product-image-container">
                         @if($product->main_image)
                         <img src="{{ asset('storage/' . $product->main_image) }}" 
@@ -105,6 +150,14 @@
                         <div class="image-placeholder product">
                             <i class="fas fa-image"></i>
                         </div>
+                        @endif
+                        
+                        @if($product->is_featured ?? false)
+                        <div class="featured-badge" style="position: absolute; top: 1rem; left: 1rem; background: #ffd700; color: #2d3748; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;">Featured</div>
+                        @endif
+                        
+                        @if(($product->discount_percentage ?? 0) > 0)
+                        <div class="discount-badge" style="position: absolute; top: 1rem; left: 1rem; background: #38a169; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;">{{ $product->discount_percentage }}% OFF</div>
                         @endif
                     </div>
                     
@@ -141,18 +194,35 @@
                         </div>
                         @endif
                         
+                        <div class="product-stock">
+                            @if(($product->stock_quantity ?? 0) > 0)
+                                <span class="in-stock">In Stock ({{ $product->stock_quantity }})</span>
+                            @else
+                                <span class="out-of-stock">Out of Stock</span>
+                            @endif
+                        </div>
+                        
                         <div class="product-actions">
                             <a href="{{ route('product', $product->slug) }}" class="btn btn-primary">
+                                <i class="fas fa-eye"></i>
                                 View Details
                             </a>
+                            @if(($product->stock_quantity ?? 0) > 0)
                             <form action="{{ route('cart.add') }}" method="POST" style="flex: 1;">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1">
                                 <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                    <i class="fas fa-cart-plus"></i>
                                     Add to Cart
                                 </button>
                             </form>
+                            @else
+                            <button class="btn btn-secondary" disabled style="width: 100%;">
+                                <i class="fas fa-times"></i>
+                                Out of Stock
+                            </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -257,12 +327,100 @@
                 </div>
                 @endif
                 
+                <!-- Dynamic Reviews -->
+                @if(isset($reviews) && $reviews->count() > 0)
+                <div class="reviews-list">
+                    @foreach($reviews as $review)
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-info">
+                                <div class="reviewer-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="reviewer-details">
+                                    <h4>{{ $review->customer_name ?? 'Anonymous' }}</h4>
+                                    <div class="review-rating">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            @if($i <= ($review->rating ?? 0))
+                                                <i class="fas fa-star filled"></i>
+                                            @else
+                                                <i class="fas fa-star"></i>
+                                            @endif
+                                        @endfor
+                                        <span class="rating-value">{{ number_format($review->rating ?? 0, 1) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="review-date">
+                                {{ $review->created_at ? $review->created_at->diffForHumans() : 'Recently' }}
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p>{{ $review->comment ?? 'No comment provided' }}</p>
+                        </div>
+                        @if($review->product_name)
+                        <div class="reviewed-product">
+                            <small>Reviewed: {{ $review->product_name }}</small>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                    
+                    <div class="reviews-pagination">
+                        {{ $reviews->links() }}
+                    </div>
+                </div>
+                @else
                 <div class="reviews-placeholder">
                     <div class="placeholder-icon">
                         <i class="fas fa-comments"></i>
                     </div>
                     <h3>Customer Reviews</h3>
                     <p>Customer reviews will appear here once customers start leaving feedback.</p>
+                    <div class="review-cta">
+                        <button class="btn btn-primary" onclick="showReviewForm()">
+                            <i class="fas fa-star"></i>
+                            Write a Review
+                        </button>
+                    </div>
+                </div>
+                @endif
+                
+                <!-- Review Form Modal -->
+                <div id="reviewModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Write a Review</h3>
+                            <span class="close" onclick="closeReviewModal()">&times;</span>
+                        </div>
+                        <form id="reviewForm" class="review-form">
+                            @csrf
+                            <input type="hidden" name="vendor_id" value="{{ $vendor->id }}">
+                            <div class="form-group">
+                                <label for="review_rating">Rating</label>
+                                <div class="rating-input">
+                                    @for($i = 5; $i >= 1; $i--)
+                                    <input type="radio" id="star{{ $i }}" name="rating" value="{{ $i }}">
+                                    <label for="star{{ $i }}" class="star-label">
+                                        <i class="fas fa-star"></i>
+                                    </label>
+                                    @endfor
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="review_comment">Your Review</label>
+                                <textarea id="review_comment" name="comment" rows="4" required placeholder="Share your experience with this vendor..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="reviewer_name">Your Name (Optional)</label>
+                                <input type="text" id="reviewer_name" name="customer_name" placeholder="Anonymous">
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -310,26 +468,71 @@
                 
                 <div class="contact-form">
                     <h3>Send us a message</h3>
-                    <form class="message-form">
+                    
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+                    
+                    <form class="message-form" action="{{ route('vendor.contact', $vendor->id) }}" method="POST">
+                        @csrf
                         <div class="form-group">
                             <label for="name">Your Name</label>
-                            <input type="text" id="name" name="name" required>
+                            <input type="text" id="name" name="name" required value="{{ old('name') }}">
+                            @error('name')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label for="email">Your Email</label>
-                            <input type="email" id="email" name="email" required>
+                            <input type="email" id="email" name="email" required value="{{ old('email') }}">
+                            @error('email')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label for="subject">Subject</label>
-                            <input type="text" id="subject" name="subject" required>
+                            <input type="text" id="subject" name="subject" required value="{{ old('subject') }}">
+                            @error('subject')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="5" required></textarea>
+                            <textarea id="message" name="message" rows="5" required placeholder="Tell us how we can help you...">{{ old('message') }}</textarea>
+                            @error('message')
+                                <span class="error-message">{{ $message }}</span>
+                            @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary">Send Message</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
+                        </button>
                     </form>
                 </div>
+                
+                <!-- Business Hours -->
+                @if(isset($businessHours) && count($businessHours) > 0)
+                <div class="business-hours">
+                    <h3>Business Hours</h3>
+                    <div class="hours-grid">
+                        @foreach($businessHours as $day => $hours)
+                        <div class="day-hours">
+                            <span class="day">{{ $day }}</span>
+                            <span class="hours">
+                                @if($hours['open'] && $hours['close'])
+                                    {{ $hours['open'] }} - {{ $hours['close'] }}
+                                @else
+                                    Closed
+                                @endif
+                            </span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Map Location Section -->
@@ -374,8 +577,42 @@
         <div class="offers-section">
             <h2 class="section-title">Special Offers & Deals</h2>
             <div class="offers-content">
+                @if(isset($offers) && $offers->count() > 0)
                 <div class="offers-grid">
-                    <!-- Featured Offers -->
+                    @foreach($offers as $offer)
+                    <div class="offer-card {{ $offer->type ?? 'featured' }}">
+                        <div class="offer-badge {{ $offer->type ?? 'featured' }}">{{ ucfirst($offer->type ?? 'Featured') }}</div>
+                        <div class="offer-content">
+                            <h3>{{ $offer->title ?? 'Special Offer' }}</h3>
+                            <p>{{ $offer->description ?? 'Get amazing deals on our products' }}</p>
+                            <div class="offer-details">
+                                <span class="discount">{{ $offer->discount_amount ?? '0' }}{{ $offer->discount_type == 'percentage' ? '%' : '$' }} OFF</span>
+                                <span class="validity">
+                                    @if($offer->valid_until)
+                                        Valid until {{ \Carbon\Carbon::parse($offer->valid_until)->format('M d, Y') }}
+                                    @else
+                                        Always Available
+                                    @endif
+                                </span>
+                            </div>
+                            @if($offer->code)
+                            <div class="offer-code">
+                                <span>Use Code:</span>
+                                <code>{{ $offer->code }}</code>
+                            </div>
+                            @endif
+                            @if($offer->terms)
+                            <div class="offer-terms">
+                                <small>{{ $offer->terms }}</small>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <div class="offers-grid">
+                    <!-- Default Offers when none exist -->
                     <div class="offer-card featured">
                         <div class="offer-badge">Featured</div>
                         <div class="offer-content">
@@ -392,7 +629,6 @@
                         </div>
                     </div>
 
-                    <!-- Seasonal Offers -->
                     <div class="offer-card seasonal">
                         <div class="offer-badge seasonal">Seasonal</div>
                         <div class="offer-content">
@@ -409,7 +645,6 @@
                         </div>
                     </div>
 
-                    <!-- Bulk Purchase Offers -->
                     <div class="offer-card bulk">
                         <div class="offer-badge bulk">Bulk</div>
                         <div class="offer-content">
@@ -426,7 +661,6 @@
                         </div>
                     </div>
 
-                    <!-- Loyalty Offers -->
                     <div class="offer-card loyalty">
                         <div class="offer-badge loyalty">Loyalty</div>
                         <div class="offer-content">
@@ -443,6 +677,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <!-- How to Use Offers -->
                 <div class="offers-info">
@@ -583,6 +818,12 @@
 }
 
 .orders-count {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.products-count {
     font-weight: 600;
     font-size: 1.1rem;
     color: #ffffff;
@@ -845,8 +1086,9 @@
     .offers-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
+        gap: 2rem;
         margin-bottom: 2rem;
+        margin-top: 1rem;
     }
 
     .offer-card {
@@ -856,7 +1098,8 @@
         padding: 1.5rem;
         border: 2px solid transparent;
         transition: all 0.3s ease;
-        overflow: hidden;
+        overflow: visible;
+        margin-top: 2rem;
     }
 
     .offer-card:hover {
@@ -897,33 +1140,50 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        z-index: 3;
     }
 
-    .offer-card.featured .offer-badge {
+        .offer-card.featured .offer-badge {
         background: #2d3748;
         color: #ffd700;
     }
-
+    
     .offer-card.seasonal .offer-badge {
         background: #2d3748;
         color: #ff6b6b;
     }
-
+    
     .offer-card.bulk .offer-badge {
         background: #2d3748;
         color: #38a169;
     }
-
+    
     .offer-card.loyalty .offer-badge {
         background: #2d3748;
         color: #667eea;
+    }
+    
+    /* Ensure proper spacing for offer content */
+    .offer-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .offer-content p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .offer-details {
+        margin-top: 1rem;
     }
 
     .offer-content h3 {
         font-size: 1.3rem;
         font-weight: 700;
         margin-bottom: 0.75rem;
-        margin-top: 0.5rem;
+        margin-top: 2rem;
+        padding-right: 80px;
     }
 
     .offer-content p {
@@ -1446,8 +1706,472 @@
     .map-display {
         height: 300px;
     }
-}
-</style>
+    
+    .product-filters {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+    }
+    
+    .filter-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .filter-select {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Product Badges */
+    .featured-badge, .discount-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+    }
+    
+    .featured-badge {
+        background: #ffd700;
+        color: #2d3748;
+    }
+    
+    .discount-badge {
+        background: #38a169;
+        color: white;
+    }
+    
+    .product-stock {
+        margin-bottom: 1rem;
+    }
+    
+    .in-stock {
+        color: #38a169;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .out-of-stock {
+        color: #e53e3e;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    /* Review Styles */
+    .reviews-list {
+        margin-top: 2rem;
+    }
+    
+    .review-item {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .reviewer-avatar {
+        width: 50px;
+        height: 50px;
+        background: #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .reviewer-details h4 {
+        margin: 0 0 0.25rem 0;
+        color: #2d3748;
+        font-size: 1.1rem;
+    }
+    
+    .review-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .review-rating .rating-value {
+        font-weight: 600;
+        color: #667eea;
+    }
+    
+    .review-date {
+        color: #718096;
+        font-size: 0.9rem;
+    }
+    
+    .review-content p {
+        color: #4a5568;
+        line-height: 1.6;
+        margin: 0 0 1rem 0;
+    }
+    
+    .reviewed-product {
+        color: #718096;
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+    
+    .review-cta {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .reviews-pagination {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        color: #2d3748;
+    }
+    
+    .close {
+        color: #a0aec0;
+        font-size: 2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    
+    .close:hover {
+        color: #2d3748;
+    }
+    
+    .review-form {
+        padding: 1.5rem;
+    }
+    
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .rating-input input[type="radio"] {
+        display: none;
+    }
+    
+    .star-label {
+        font-size: 2rem;
+        color: #e2e8f0;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    
+    .star-label:hover,
+    .star-label:hover ~ .star-label,
+    .rating-input input[type="radio"]:checked ~ .star-label {
+        color: #ffd700;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+    
+    /* Business Hours */
+    .business-hours {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .business-hours h3 {
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        font-size: 1.3rem;
+    }
+    
+    .hours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .day-hours {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .day {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .hours {
+        color: #4a5568;
+        font-size: 0.9rem;
+    }
+    
+    /* Error Messages */
+    .error-message {
+        color: #e53e3e;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+    
+    /* Success Alert */
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .alert-success {
+        background: #f0fff4;
+        border: 1px solid #9ae6b4;
+        color: #22543d;
+    }
+    
+    .alert i {
+        font-size: 1.2rem;
+    }
+    
+    /* Product Filters and Search */
+    .product-filters {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #a0aec0;
+    }
+    
+    .filter-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .filter-select {
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.2s ease;
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* Product Badges */
+    .featured-badge, .discount-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background: #ff6b6b;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 2;
+    }
+    
+    .featured-badge {
+        background: #ffd700;
+        color: #2d3748;
+    }
+    
+    .discount-badge {
+        background: #38a169;
+        color: white;
+    }
+    
+    .product-stock {
+        margin-bottom: 1rem;
+    }
+    
+    .in-stock {
+        color: #38a169;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .out-of-stock {
+        color: #e53e3e;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+         /* Mobile responsive for product filters */
+     @media (max-width: 768px) {
+         .product-filters {
+             padding: 1rem;
+         }
+         
+         .filter-options {
+             grid-template-columns: 1fr;
+         }
+         
+         .search-input {
+             padding: 0.75rem 1rem 0.75rem 2.5rem;
+         }
+         
+         .filter-select {
+             padding: 0.75rem;
+         }
+     }
+ </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1528,6 +2252,213 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('map')) {
         initMap();
     }
+
+    // Product Search and Filtering
+    const productSearch = document.getElementById('productSearch');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const priceFilter = document.getElementById('priceFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const productsGrid = document.querySelector('.products-grid');
+
+    if (productSearch && productsGrid) {
+        // Search functionality
+        productSearch.addEventListener('input', filterProducts);
+        
+        // Filter functionality
+        categoryFilter.addEventListener('change', filterProducts);
+        priceFilter.addEventListener('change', filterProducts);
+        sortFilter.addEventListener('change', filterProducts);
+
+        function filterProducts() {
+            const searchTerm = productSearch.value.toLowerCase();
+            const selectedCategory = categoryFilter.value;
+            const selectedPrice = priceFilter.value;
+            const selectedSort = sortFilter.value;
+            
+            const productCards = productsGrid.querySelectorAll('.product-card');
+            let visibleProducts = [];
+
+            productCards.forEach(card => {
+                let show = true;
+                
+                // Search filter
+                const productName = card.dataset.name;
+                if (searchTerm && !productName.includes(searchTerm)) {
+                    show = false;
+                }
+                
+                // Category filter
+                if (selectedCategory && card.dataset.category !== selectedCategory) {
+                    show = false;
+                }
+                
+                // Price filter
+                if (selectedPrice) {
+                    const price = parseFloat(card.dataset.price);
+                    const [min, max] = selectedPrice.split('-').map(p => p === '+' ? Infinity : parseFloat(p));
+                    if (price < min || price > max) {
+                        show = false;
+                    }
+                }
+                
+                if (show) {
+                    card.style.display = 'block';
+                    visibleProducts.push(card);
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Sort products
+            sortProducts(visibleProducts, selectedSort);
+            
+            // Update grid
+            visibleProducts.forEach(card => {
+                productsGrid.appendChild(card);
+            });
+            
+            // Show/hide no products message
+            const noProducts = document.querySelector('.no-products');
+            if (visibleProducts.length === 0) {
+                if (!noProducts) {
+                    showNoProductsMessage();
+                }
+            } else {
+                if (noProducts) {
+                    noProducts.remove();
+                }
+            }
+        }
+
+        function sortProducts(products, sortBy) {
+            products.sort((a, b) => {
+                switch (sortBy) {
+                    case 'newest':
+                        return b.dataset.date - a.dataset.date;
+                    case 'oldest':
+                        return a.dataset.date - b.dataset.date;
+                    case 'price_low':
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    case 'price_high':
+                        return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                    case 'rating':
+                        return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+                    case 'name':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    default:
+                        return 0;
+                }
+            });
+        }
+
+        function showNoProductsMessage() {
+            const message = document.createElement('div');
+            message.className = 'no-products';
+            message.innerHTML = `
+                <div class="no-products-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No Products Found</h3>
+                <p>Try adjusting your search criteria or filters.</p>
+            `;
+            productsGrid.parentNode.insertBefore(message, productsGrid);
+        }
+    }
+
+    // Review Modal Functionality
+    function showReviewForm() {
+        const modal = document.getElementById('reviewModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeReviewModal() {
+        const modal = document.getElementById('reviewModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('reviewModal');
+        if (event.target === modal) {
+            closeReviewModal();
+        }
+    }
+
+    // Handle review form submission
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission (replace with actual AJAX call)
+            setTimeout(() => {
+                alert('Thank you for your review! It will be published after moderation.');
+                closeReviewModal();
+                this.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Reload page to show new review
+                location.reload();
+            }, 1500);
+        });
+    }
+
+    // Dynamic content loading
+    function loadDynamicContent() {
+        // Load vendor statistics
+        loadVendorStats();
+        
+        // Load recent activity
+        loadRecentActivity();
+    }
+
+    function loadVendorStats() {
+        // This would make an AJAX call to get updated stats
+        // For now, we'll simulate it
+        const statsElements = document.querySelectorAll('[data-stat]');
+        statsElements.forEach(element => {
+            const statType = element.dataset.stat;
+            // Simulate loading animation
+            element.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            
+            setTimeout(() => {
+                // Simulate updated data
+                switch (statType) {
+                    case 'rating':
+                        element.innerHTML = '{{ number_format($vendor->rating ?? 0, 1) }}';
+                        break;
+                    case 'orders':
+                        element.innerHTML = '{{ $vendor->total_orders ?? 0 }}';
+                        break;
+                    case 'products':
+                        element.innerHTML = '{{ $products->count() }}';
+                        break;
+                }
+            }, 1000);
+        });
+    }
+
+    function loadRecentActivity() {
+        // This would load recent orders, reviews, etc.
+        // Implementation depends on your backend structure
+    }
+
+    // Initialize dynamic features
+    loadDynamicContent();
 });
 </script>
 @endsection
