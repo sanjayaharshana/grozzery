@@ -12,13 +12,13 @@
                 <img src="{{ asset('storage/' . $vendor->logo) }}" alt="{{ $vendor->business_name }}" class="logo-image">
             </div>
             @endif
-            
+
             <div class="vendor-details">
                 <h1 class="vendor-name">{{ $vendor->business_name }}</h1>
                 @if($vendor->business_description)
                 <p class="vendor-description">{{ $vendor->business_description }}</p>
                 @endif
-                
+
                 <div class="vendor-meta">
                     @if($vendor->rating)
                     <div class="vendor-rating">
@@ -34,18 +34,18 @@
                         <span class="rating-value" data-stat="rating">{{ number_format($vendor->rating, 1) }}</span>
                     </div>
                     @endif
-                    
+
                     @if($vendor->total_orders)
                     <div class="vendor-orders">
                         <span class="orders-count" data-stat="orders">{{ $vendor->total_orders }} orders</span>
                     </div>
                     @endif
-                    
+
                     <div class="vendor-products-count">
                         <span class="products-count" data-stat="products">{{ $products->count() }} products</span>
                     </div>
                 </div>
-                
+
                 @if($vendor->address || $vendor->city || $vendor->state)
                 <div class="vendor-location">
                     <i class="fas fa-map-marker-alt"></i>
@@ -91,14 +91,14 @@
     <div id="products" class="vendor-section active">
         <div class="vendor-products">
             <h2 class="section-title">Products from {{ $vendor->business_name }}</h2>
-            
+
             <!-- Product Filters and Search -->
             <div class="product-filters" style="margin-bottom: 2rem; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
                 <div class="search-box" style="position: relative; margin-bottom: 1rem;">
                     <input type="text" id="productSearch" placeholder="Search products..." class="search-input" style="width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                     <i class="fas fa-search search-icon" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #a0aec0;"></i>
                 </div>
-                
+
                 <div class="filter-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                     <select id="categoryFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                         <option value="">All Categories</option>
@@ -108,7 +108,7 @@
                             @endforeach
                         @endif
                     </select>
-                    
+
                     <select id="priceFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                         <option value="">All Prices</option>
                         <option value="0-25">$0 - $25</option>
@@ -116,7 +116,7 @@
                         <option value="50-100">$50 - $100</option>
                         <option value="100+">$100+</option>
                     </select>
-                    
+
                     <select id="sortFilter" class="filter-select" style="padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; background: white; cursor: pointer; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'" onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
@@ -127,58 +127,62 @@
                     </select>
                 </div>
             </div>
-            
+
             @if($products->count() > 0)
             <div class="products-grid">
                 @foreach($products as $product)
-                <div class="product-card" 
+                <div class="product-card"
                      data-category="{{ $product->category_id ?? '' }}"
                      data-price="{{ $product->price }}"
                      data-rating="{{ $product->rating ?? 0 }}"
                      data-name="{{ strtolower($product->name) }}"
                      data-date="{{ $product->created_at ? $product->created_at->timestamp : 0 }}">
-                    <div class="product-image-container">
-                        @if($product->main_image)
-                        <img src="{{ asset('storage/' . $product->main_image) }}" 
-                             alt="{{ $product->name }}" 
-                             class="product-image"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="image-placeholder product" style="display: none;">
-                            <i class="fas fa-image"></i>
+
+                    <a href="{{ route('product', $product->slug) }}">
+                        <div class="product-image-container">
+                            @if($product->main_image)
+                                <img src="{{ asset('storage/' . $product->main_image) }}"
+                                     alt="{{ $product->name }}"
+                                     class="product-image"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="image-placeholder product" style="display: none;">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            @else
+                                <div class="image-placeholder product">
+                                    <i class="fas fa-image"></i>
+                                </div>
+                            @endif
+
+                            @if($product->is_featured ?? false)
+                                <div class="featured-badge" style="position: absolute; top: 0.5rem; left: 0.5rem; background: #ffd700; color: #2d3748; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">Featured</div>
+                            @endif
+
+                            @if(($product->discount_percentage ?? 0) > 0)
+                                <div class="discount-badge" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #38a169; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">{{ $product->discount_percentage }}% OFF</div>
+                            @endif
                         </div>
-                        @else
-                        <div class="image-placeholder product">
-                            <i class="fas fa-image"></i>
-                        </div>
-                        @endif
-                        
-                        @if($product->is_featured ?? false)
-                        <div class="featured-badge" style="position: absolute; top: 0.5rem; left: 0.5rem; background: #ffd700; color: #2d3748; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">Featured</div>
-                        @endif
-                        
-                        @if(($product->discount_percentage ?? 0) > 0)
-                        <div class="discount-badge" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #38a169; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">{{ $product->discount_percentage }}% OFF</div>
-                        @endif
-                    </div>
-                    
+                    </a>
+
+
                     <div class="product-info">
                         <h3 class="product-title">
                             <a href="{{ route('product', $product->slug) }}" class="product-link">
                                 {{ $product->name }}
                             </a>
                         </h3>
-                        
+
                         @if($product->category)
                         <p class="product-category">{{ $product->category->name }}</p>
                         @endif
-                        
+
                         <div class="product-price">
                             <span class="price-new">${{ number_format($product->price, 2) }}</span>
                             @if($product->compare_price && $product->compare_price > $product->price)
                             <span class="price-old">${{ number_format($product->compare_price, 2) }}</span>
                             @endif
                         </div>
-                        
+
                         @if($product->rating)
                         <div class="product-rating">
                             <span class="rating-stars">
@@ -193,32 +197,26 @@
                             <span class="rating-value">{{ number_format($product->rating, 1) }}</span>
                         </div>
                         @endif
-                        
+
                         <div class="product-stock">
-                            @if(($product->stock_quantity ?? 0) > 0)
-                                <span class="in-stock">In Stock ({{ $product->stock_quantity }})</span>
+                            @if(($product->quantity ?? 0) > 0)
+                                <span class="in-stock" style="background: #2da5dc;color: white;padding: 0px 10px 2px 10px;border-radius: 5px;">In Stock ({{ $product->quantity }})</span>
                             @else
-                                <span class="out-of-stock">Out of Stock</span>
+                                <span class="out-of-stock" style="background: #9d0202;color: white;padding: 0px 10px 2px 10px;border-radius: 5px;">Out of Stock</span>
                             @endif
                         </div>
-                        
+
                         <div class="product-actions">
-                            <a href="{{ route('product', $product->slug) }}" class="btn btn-primary btn-icon" title="View Details">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            @if(($product->stock_quantity ?? 0) > 0)
+                            @if(($product->quantity ?? 0) > 0)
                             <form action="{{ route('cart.add') }}" method="POST" style="flex: 1;">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="btn btn-secondary btn-icon" style="width: 100%;" title="Add to Cart">
+                                <button type="submit" class="btn btn-primary btn-icon" style="width: 100%;" title="Add to Cart">
                                     <i class="fas fa-cart-plus"></i>
                                 </button>
                             </form>
                             @else
-                            <button class="btn btn-secondary btn-icon" disabled style="width: 100%;" title="Out of Stock">
-                                <i class="fas fa-times"></i>
-                            </button>
                             @endif
                             <button class="btn btn-outline btn-icon" title="Add to Wishlist">
                                 <i class="fas fa-heart"></i>
@@ -228,7 +226,7 @@
                 </div>
                 @endforeach
             </div>
-            
+
             <div class="pagination-container mt-8">
                 {{ $products->links() }}
             </div>
@@ -255,7 +253,7 @@
                     <p>{{ $vendor->business_description }}</p>
                 </div>
                 @endif
-                
+
                 <div class="about-details">
                     <div class="detail-item">
                         <i class="fas fa-calendar-alt"></i>
@@ -264,7 +262,7 @@
                             <p>{{ $vendor->created_at ? $vendor->created_at->format('F Y') : 'Recently' }}</p>
                         </div>
                     </div>
-                    
+
                     @if($vendor->total_orders)
                     <div class="detail-item">
                         <i class="fas fa-shopping-bag"></i>
@@ -274,7 +272,7 @@
                         </div>
                     </div>
                     @endif
-                    
+
                     @if($vendor->rating)
                     <div class="detail-item">
                         <i class="fas fa-star"></i>
@@ -284,7 +282,7 @@
                         </div>
                     </div>
                     @endif
-                    
+
                     @if($vendor->address || $vendor->city || $vendor->state)
                     <div class="detail-item">
                         <i class="fas fa-map-marker-alt"></i>
@@ -326,7 +324,7 @@
                     </div>
                 </div>
                 @endif
-                
+
                 <!-- Dynamic Reviews -->
                 @if(isset($reviews) && $reviews->count() > 0)
                 <div class="reviews-list">
@@ -365,7 +363,7 @@
                         @endif
                     </div>
                     @endforeach
-                    
+
                     <div class="reviews-pagination">
                         {{ $reviews->links() }}
                     </div>
@@ -385,7 +383,7 @@
                     </div>
                 </div>
                 @endif
-                
+
                 <!-- Review Form Modal -->
                 <div id="reviewModal" class="modal">
                     <div class="modal-content">
@@ -441,7 +439,7 @@
                         </div>
                     </div>
                     @endif
-                    
+
                     @if($vendor->address || $vendor->city || $vendor->state)
                     <div class="contact-item">
                         <i class="fas fa-map-marker-alt"></i>
@@ -456,7 +454,7 @@
                         </div>
                     </div>
                     @endif
-                    
+
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
                         <div class="contact-details">
@@ -465,17 +463,17 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="contact-form">
                     <h3>Send us a message</h3>
-                    
+
                     @if(session('success'))
                         <div class="alert alert-success">
                             <i class="fas fa-check-circle"></i>
                             {{ session('success') }}
                         </div>
                     @endif
-                    
+
                     <form class="message-form" action="{{ route('vendor.contact', $vendor->id) }}" method="POST">
                         @csrf
                         <div class="form-group">
@@ -512,7 +510,7 @@
                         </button>
                     </form>
                 </div>
-                
+
                 <!-- Business Hours -->
                 @if(isset($businessHours) && count($businessHours) > 0)
                 <div class="business-hours">
@@ -1147,33 +1145,33 @@
         background: #2d3748;
         color: #ffd700;
     }
-    
+
     .offer-card.seasonal .offer-badge {
         background: #2d3748;
         color: #ff6b6b;
     }
-    
+
     .offer-card.bulk .offer-badge {
         background: #2d3748;
         color: #38a169;
     }
-    
+
     .offer-card.loyalty .offer-badge {
         background: #2d3748;
         color: #667eea;
     }
-    
+
     /* Ensure proper spacing for offer content */
     .offer-content {
         position: relative;
         z-index: 1;
     }
-    
+
     .offer-content p {
         margin-bottom: 1rem;
         line-height: 1.6;
     }
-    
+
     .offer-details {
         margin-top: 1rem;
     }
@@ -1672,84 +1670,84 @@
         flex-direction: column;
         text-align: center;
     }
-    
+
     .vendor-name {
         font-size: 2rem;
     }
-    
+
     .vendor-meta {
         justify-content: center;
         flex-wrap: wrap;
     }
-    
+
     .nav-menu {
         flex-direction: row;
         flex-wrap: wrap;
     }
-    
+
     .nav-item {
         flex: 1 1 auto;
         min-width: 120px;
         padding: 0.75rem 1rem;
     }
-    
+
     .nav-item.active {
         border-bottom-color: #667eea;
     }
-    
+
     .message-form {
         grid-template-columns: 1fr;
     }
-    
+
     .products-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 0.75rem;
     }
-    
+
     .product-image-container {
         height: 80px;
     }
-    
+
     .product-info {
         padding: 0.5rem;
     }
-    
+
     .product-title {
         font-size: 0.8rem;
     }
-    
+
     .btn-icon {
         min-width: 32px;
         height: 32px;
         padding: 0.4rem;
     }
-    
+
     .product-actions {
         flex-direction: column;
     }
-    
+
     .about-details,
     .contact-info {
         grid-template-columns: 1fr;
     }
-    
+
     .offers-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .usage-steps {
         grid-template-columns: 1fr;
     }
-    
+
     .map-container {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-    
+
     .map-display {
         height: 300px;
     }
-    
+
     .product-filters {
         margin-bottom: 2rem;
         padding: 1.5rem;
@@ -1757,12 +1755,12 @@
         border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     .search-box {
         position: relative;
         margin-bottom: 1rem;
     }
-    
+
     .search-input {
         width: 100%;
         padding: 0.75rem 1rem 0.75rem 2.5rem;
@@ -1771,13 +1769,13 @@
         font-size: 1rem;
         transition: border-color 0.2s ease;
     }
-    
+
     .search-input:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     .search-icon {
         position: absolute;
         left: 1rem;
@@ -1785,13 +1783,13 @@
         transform: translateY(-50%);
         color: #a0aec0;
     }
-    
+
     .filter-options {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
     }
-    
+
     .filter-select {
         padding: 0.75rem;
         border: 1px solid #e2e8f0;
@@ -1801,13 +1799,13 @@
         cursor: pointer;
         transition: border-color 0.2s ease;
     }
-    
+
     .filter-select:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     /* Product Badges */
     .featured-badge, .discount-badge {
         position: absolute;
@@ -1823,38 +1821,38 @@
         letter-spacing: 0.5px;
         z-index: 2;
     }
-    
+
     .featured-badge {
         background: #ffd700;
         color: #2d3748;
     }
-    
+
     .discount-badge {
         background: #38a169;
         color: white;
     }
-    
+
     .product-stock {
         margin-bottom: 1rem;
     }
-    
+
     .in-stock {
         color: #38a169;
         font-size: 0.9rem;
         font-weight: 600;
     }
-    
+
     .out-of-stock {
         color: #e53e3e;
         font-size: 0.9rem;
         font-weight: 600;
     }
-    
+
     /* Review Styles */
     .reviews-list {
         margin-top: 2rem;
     }
-    
+
     .review-item {
         background: white;
         border-radius: 12px;
@@ -1863,20 +1861,20 @@
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         border: 1px solid #e2e8f0;
     }
-    
+
     .review-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 1rem;
     }
-    
+
     .reviewer-info {
         display: flex;
         align-items: center;
         gap: 1rem;
     }
-    
+
     .reviewer-avatar {
         width: 50px;
         height: 50px;
@@ -1888,52 +1886,52 @@
         color: white;
         font-size: 1.2rem;
     }
-    
+
     .reviewer-details h4 {
         margin: 0 0 0.25rem 0;
         color: #2d3748;
         font-size: 1.1rem;
     }
-    
+
     .review-rating {
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
-    
+
     .review-rating .rating-value {
         font-weight: 600;
         color: #667eea;
     }
-    
+
     .review-date {
         color: #718096;
         font-size: 0.9rem;
     }
-    
+
     .review-content p {
         color: #4a5568;
         line-height: 1.6;
         margin: 0 0 1rem 0;
     }
-    
+
     .reviewed-product {
         color: #718096;
         font-size: 0.9rem;
         font-style: italic;
     }
-    
+
     .review-cta {
         text-align: center;
         margin-top: 1rem;
     }
-    
+
     .reviews-pagination {
         margin-top: 2rem;
         display: flex;
         justify-content: center;
     }
-    
+
     /* Modal Styles */
     .modal {
         display: none;
@@ -1945,7 +1943,7 @@
         height: 100%;
         background-color: rgba(0, 0, 0, 0.5);
     }
-    
+
     .modal-content {
         background-color: white;
         margin: 5% auto;
@@ -1956,7 +1954,7 @@
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         animation: modalSlideIn 0.3s ease;
     }
-    
+
     @keyframes modalSlideIn {
         from {
             opacity: 0;
@@ -1967,7 +1965,7 @@
             transform: translateY(0);
         }
     }
-    
+
     .modal-header {
         padding: 1.5rem;
         border-bottom: 1px solid #e2e8f0;
@@ -1975,12 +1973,12 @@
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .modal-header h3 {
         margin: 0;
         color: #2d3748;
     }
-    
+
     .close {
         color: #a0aec0;
         font-size: 2rem;
@@ -1988,65 +1986,65 @@
         cursor: pointer;
         transition: color 0.2s ease;
     }
-    
+
     .close:hover {
         color: #2d3748;
     }
-    
+
     .review-form {
         padding: 1.5rem;
     }
-    
+
     .rating-input {
         display: flex;
         flex-direction: row-reverse;
         gap: 0.5rem;
         margin-bottom: 1rem;
     }
-    
+
     .rating-input input[type="radio"] {
         display: none;
     }
-    
+
     .star-label {
         font-size: 2rem;
         color: #e2e8f0;
         cursor: pointer;
         transition: color 0.2s ease;
     }
-    
+
     .star-label:hover,
     .star-label:hover ~ .star-label,
     .rating-input input[type="radio"]:checked ~ .star-label {
         color: #ffd700;
     }
-    
+
     .form-actions {
         display: flex;
         gap: 1rem;
         justify-content: flex-end;
         margin-top: 1.5rem;
     }
-    
+
     /* Business Hours */
     .business-hours {
         margin-top: 2rem;
         padding-top: 2rem;
         border-top: 1px solid #e2e8f0;
     }
-    
+
     .business-hours h3 {
         color: #2d3748;
         margin-bottom: 1.5rem;
         font-size: 1.3rem;
     }
-    
+
     .hours-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
     }
-    
+
     .day-hours {
         display: flex;
         justify-content: space-between;
@@ -2056,17 +2054,17 @@
         border-radius: 8px;
         border: 1px solid #e2e8f0;
     }
-    
+
     .day {
         font-weight: 600;
         color: #2d3748;
     }
-    
+
     .hours {
         color: #4a5568;
         font-size: 0.9rem;
     }
-    
+
     /* Error Messages */
     .error-message {
         color: #e53e3e;
@@ -2074,7 +2072,7 @@
         margin-top: 0.25rem;
         display: block;
     }
-    
+
     /* Success Alert */
     .alert {
         padding: 1rem;
@@ -2084,17 +2082,17 @@
         align-items: center;
         gap: 0.75rem;
     }
-    
+
     .alert-success {
         background: #f0fff4;
         border: 1px solid #9ae6b4;
         color: #22543d;
     }
-    
+
     .alert i {
         font-size: 1.2rem;
     }
-    
+
     /* Product Filters and Search */
     .product-filters {
         margin-bottom: 2rem;
@@ -2103,12 +2101,12 @@
         border-radius: 12px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    
+
     .search-box {
         position: relative;
         margin-bottom: 1rem;
     }
-    
+
     .search-input {
         width: 100%;
         padding: 0.75rem 1rem 0.75rem 2.5rem;
@@ -2117,13 +2115,13 @@
         font-size: 1rem;
         transition: border-color 0.2s ease;
     }
-    
+
     .search-input:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     .search-icon {
         position: absolute;
         left: 1rem;
@@ -2131,13 +2129,13 @@
         transform: translateY(-50%);
         color: #a0aec0;
     }
-    
+
     .filter-options {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
     }
-    
+
     .filter-select {
         padding: 0.75rem;
         border: 1px solid #e2e8f0;
@@ -2147,13 +2145,13 @@
         cursor: pointer;
         transition: border-color 0.2s ease;
     }
-    
+
     .filter-select:focus {
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-    
+
     /* Product Badges */
     .featured-badge, .discount-badge {
         position: absolute;
@@ -2169,51 +2167,51 @@
         letter-spacing: 0.5px;
         z-index: 2;
     }
-    
+
     .featured-badge {
         background: #ffd700;
         color: #2d3748;
     }
-    
+
     .discount-badge {
         background: #38a169;
         color: white;
     }
-    
+
     .product-stock {
         margin-bottom: 1rem;
     }
-    
+
     .in-stock {
         color: #38a169;
         font-size: 0.9rem;
         font-weight: 600;
     }
-    
+
     .out-of-stock {
         color: #e53e3e;
         font-size: 0.9rem;
         font-weight: 600;
     }
-    
+
          /* Mobile responsive for product filters */
      @media (max-width: 768px) {
          .product-filters {
              padding: 1rem;
          }
-         
+
          .filter-options {
              grid-template-columns: 1fr;
          }
-         
+
          .search-input {
              padding: 0.75rem 1rem 0.75rem 2.5rem;
          }
-         
+
          .filter-select {
              padding: 0.75rem;
               }
-     
+
      /* Tablet responsive */
      @media (max-width: 1024px) and (min-width: 769px) {
          .products-grid {
@@ -2221,7 +2219,7 @@
              gap: 0.75rem;
          }
      }
-     
+
      /* Small desktop */
      @media (max-width: 1200px) and (min-width: 1025px) {
          .products-grid {
@@ -2236,24 +2234,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.vendor-section');
-    
+
     navItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             // Remove active class from all nav items and sections
             navItems.forEach(nav => nav.classList.remove('active'));
             sections.forEach(section => section.classList.remove('active'));
-            
+
             // Add active class to clicked nav item
             this.classList.add('active');
-            
+
             // Show corresponding section
             const targetSection = this.getAttribute('data-section');
             document.getElementById(targetSection).classList.add('active');
         });
     });
-    
+
     // Handle form submission
     const messageForm = document.querySelector('.message-form');
     if (messageForm) {
@@ -2322,7 +2320,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (productSearch && productsGrid) {
         // Search functionality
         productSearch.addEventListener('input', filterProducts);
-        
+
         // Filter functionality
         categoryFilter.addEventListener('change', filterProducts);
         priceFilter.addEventListener('change', filterProducts);
@@ -2333,24 +2331,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedCategory = categoryFilter.value;
             const selectedPrice = priceFilter.value;
             const selectedSort = sortFilter.value;
-            
+
             const productCards = productsGrid.querySelectorAll('.product-card');
             let visibleProducts = [];
 
             productCards.forEach(card => {
                 let show = true;
-                
+
                 // Search filter
                 const productName = card.dataset.name;
                 if (searchTerm && !productName.includes(searchTerm)) {
                     show = false;
                 }
-                
+
                 // Category filter
                 if (selectedCategory && card.dataset.category !== selectedCategory) {
                     show = false;
                 }
-                
+
                 // Price filter
                 if (selectedPrice) {
                     const price = parseFloat(card.dataset.price);
@@ -2359,7 +2357,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         show = false;
                     }
                 }
-                
+
                 if (show) {
                     card.style.display = 'block';
                     visibleProducts.push(card);
@@ -2367,15 +2365,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     card.style.display = 'none';
                 }
             });
-            
+
             // Sort products
             sortProducts(visibleProducts, selectedSort);
-            
+
             // Update grid
             visibleProducts.forEach(card => {
                 productsGrid.appendChild(card);
             });
-            
+
             // Show/hide no products message
             const noProducts = document.querySelector('.no-products');
             if (visibleProducts.length === 0) {
@@ -2454,14 +2452,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (reviewForm) {
         reviewForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            
+
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
             submitBtn.disabled = true;
-            
+
             // Simulate form submission (replace with actual AJAX call)
             setTimeout(() => {
                 alert('Thank you for your review! It will be published after moderation.');
@@ -2469,7 +2467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.reset();
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
-                
+
                 // Reload page to show new review
                 location.reload();
             }, 1500);
@@ -2480,7 +2478,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadDynamicContent() {
         // Load vendor statistics
         loadVendorStats();
-        
+
         // Load recent activity
         loadRecentActivity();
     }
@@ -2493,7 +2491,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const statType = element.dataset.stat;
             // Simulate loading animation
             element.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
+
             setTimeout(() => {
                 // Simulate updated data
                 switch (statType) {
