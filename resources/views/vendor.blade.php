@@ -153,11 +153,11 @@
                         @endif
                         
                         @if($product->is_featured ?? false)
-                        <div class="featured-badge" style="position: absolute; top: 1rem; left: 1rem; background: #ffd700; color: #2d3748; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;">Featured</div>
+                        <div class="featured-badge" style="position: absolute; top: 0.5rem; left: 0.5rem; background: #ffd700; color: #2d3748; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">Featured</div>
                         @endif
                         
                         @if(($product->discount_percentage ?? 0) > 0)
-                        <div class="discount-badge" style="position: absolute; top: 1rem; left: 1rem; background: #38a169; color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; z-index: 2;">{{ $product->discount_percentage }}% OFF</div>
+                        <div class="discount-badge" style="position: absolute; top: 0.5rem; right: 0.5rem; background: #38a169; color: white; padding: 0.15rem 0.5rem; border-radius: 12px; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; z-index: 2;">{{ $product->discount_percentage }}% OFF</div>
                         @endif
                     </div>
                     
@@ -203,26 +203,26 @@
                         </div>
                         
                         <div class="product-actions">
-                            <a href="{{ route('product', $product->slug) }}" class="btn btn-primary">
+                            <a href="{{ route('product', $product->slug) }}" class="btn btn-primary btn-icon" title="View Details">
                                 <i class="fas fa-eye"></i>
-                                View Details
                             </a>
                             @if(($product->stock_quantity ?? 0) > 0)
                             <form action="{{ route('cart.add') }}" method="POST" style="flex: 1;">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                <button type="submit" class="btn btn-secondary btn-icon" style="width: 100%;" title="Add to Cart">
                                     <i class="fas fa-cart-plus"></i>
-                                    Add to Cart
                                 </button>
                             </form>
                             @else
-                            <button class="btn btn-secondary" disabled style="width: 100%;">
+                            <button class="btn btn-secondary btn-icon" disabled style="width: 100%;" title="Out of Stock">
                                 <i class="fas fa-times"></i>
-                                Out of Stock
                             </button>
                             @endif
+                            <button class="btn btn-outline btn-icon" title="Add to Wishlist">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1478,17 +1478,18 @@
 /* Products Section Styles */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
     margin-bottom: 2rem;
 }
 
 .product-card {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 0;
 }
 
 .product-card:hover {
@@ -1498,7 +1499,7 @@
 
 .product-image-container {
     position: relative;
-    height: 200px;
+    height: 100px;
     overflow: hidden;
 }
 
@@ -1525,14 +1526,14 @@
 }
 
 .product-info {
-    padding: 1.5rem;
+    padding: 0.75rem;
 }
 
 .product-title {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
 }
 
 .product-link {
@@ -1547,8 +1548,8 @@
 
 .product-category {
     color: #718096;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -1561,13 +1562,13 @@
 }
 
 .price-new {
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #38a169;
 }
 
 .price-old {
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: #a0aec0;
     text-decoration: line-through;
 }
@@ -1575,13 +1576,14 @@
 .product-rating {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .product-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
+    justify-content: space-between;
 }
 
 .btn {
@@ -1594,6 +1596,28 @@
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-block;
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #667eea;
+    border: 1px solid #667eea;
+}
+
+.btn-outline:hover {
+    background: #667eea;
+    color: white;
 }
 
 .btn-primary {
@@ -1678,7 +1702,26 @@
     }
     
     .products-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .product-image-container {
+        height: 80px;
+    }
+    
+    .product-info {
+        padding: 0.5rem;
+    }
+    
+    .product-title {
+        font-size: 0.8rem;
+    }
+    
+    .btn-icon {
+        min-width: 32px;
+        height: 32px;
+        padding: 0.4rem;
     }
     
     .product-actions {
@@ -2169,9 +2212,25 @@
          
          .filter-select {
              padding: 0.75rem;
+              }
+     
+     /* Tablet responsive */
+     @media (max-width: 1024px) and (min-width: 769px) {
+         .products-grid {
+             grid-template-columns: repeat(3, 1fr);
+             gap: 0.75rem;
          }
      }
- </style>
+     
+     /* Small desktop */
+     @media (max-width: 1200px) and (min-width: 1025px) {
+         .products-grid {
+             grid-template-columns: repeat(4, 1fr);
+             gap: 0.75rem;
+         }
+     }
+ }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
