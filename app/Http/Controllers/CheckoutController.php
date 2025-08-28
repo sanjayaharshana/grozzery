@@ -22,7 +22,7 @@ class CheckoutController extends Controller
     {
         $user = Auth::user();
         $cartItems = session('cart', []);
-        
+
         if (empty($cartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
@@ -30,21 +30,21 @@ class CheckoutController extends Controller
         // Process cart items to ensure they have all required fields
         $processedCartItems = [];
         $subtotal = 0;
-        
+
         foreach ($cartItems as $cartKey => $item) {
             // Get fresh product data
             $product = Product::find($item['product_id']);
             if (!$product) continue;
-            
+
             // Get variant if exists
             $variant = null;
             if (isset($item['variant_id']) && $item['variant_id']) {
                 $variant = ProductVariant::find($item['variant_id']);
             }
-            
+
             // Calculate price
             $price = $variant ? $variant->price : $product->price;
-            
+
             // Create processed item
             $processedItem = [
                 'cart_key' => $cartKey,
@@ -56,18 +56,18 @@ class CheckoutController extends Controller
                 'price' => $price,
                 'total' => $price * $item['quantity']
             ];
-            
+
             $processedCartItems[] = $processedItem;
             $subtotal += $processedItem['total'];
         }
-        
+
         if (empty($processedCartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
 
         // Get user's addresses
         $addresses = $user->addresses()->orderBy('is_default', 'desc')->get();
-        
+
         // Calculate totals
         $shipping = 5.99; // Fixed shipping cost
         $tax = $subtotal * 0.08; // 8% tax
@@ -106,7 +106,7 @@ class CheckoutController extends Controller
 
         $user = Auth::user();
         $cartItems = session('cart', []);
-        
+
         if (empty($cartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
@@ -117,16 +117,16 @@ class CheckoutController extends Controller
             // Get fresh product data
             $product = Product::find($item['product_id']);
             if (!$product) continue;
-            
+
             // Get variant if exists
             $variant = null;
             if (isset($item['variant_id']) && $item['variant_id']) {
                 $variant = ProductVariant::find($item['variant_id']);
             }
-            
+
             // Calculate price
             $price = $variant ? $variant->price : $product->price;
-            
+
             // Create processed item
             $processedItem = [
                 'cart_key' => $cartKey,
@@ -138,10 +138,10 @@ class CheckoutController extends Controller
                 'price' => $price,
                 'total' => $price * $item['quantity']
             ];
-            
+
             $processedCartItems[] = $processedItem;
         }
-        
+
         if (empty($processedCartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
@@ -151,7 +151,7 @@ class CheckoutController extends Controller
             // Verify address ownership
             $shippingAddress = $user->addresses()->findOrFail($request->shipping_address_id);
             $billingAddress = $user->addresses()->findOrFail($request->billing_address_id);
-            
+
             $shippingAddressData = [
                 'first_name' => $shippingAddress->first_name,
                 'last_name' => $shippingAddress->last_name,
@@ -165,7 +165,7 @@ class CheckoutController extends Controller
                 'latitude' => $shippingAddress->latitude,
                 'longitude' => $shippingAddress->longitude,
             ];
-            
+
             $billingAddressData = [
                 'first_name' => $billingAddress->first_name,
                 'last_name' => $billingAddress->last_name,
@@ -194,7 +194,7 @@ class CheckoutController extends Controller
                 'latitude' => $request->delivery_latitude,
                 'longitude' => $request->delivery_longitude,
             ];
-            
+
             // For location-based delivery, billing address is same as shipping
             $billingAddressData = $shippingAddressData;
         }
@@ -218,18 +218,18 @@ class CheckoutController extends Controller
                 $subtotal = 0;
                 $shipping = 0;
                 $tax = 0;
-                
+
                 foreach ($items as $item) {
                     $subtotal += $item['price'] * $item['quantity'];
                 }
-                
+
                 // Calculate shipping based on delivery type and distance
                 if ($request->delivery_type === 'location_based') {
                     $shipping = $this->calculateLocationBasedShipping($request->delivery_latitude, $request->delivery_longitude, $vendorId);
                 } else {
                     $shipping = 5.99; // Fixed shipping cost for address-based delivery
                 }
-                
+
                 $tax = $subtotal * 0.08; // 8% tax
                 $total = $subtotal + $shipping + $tax;
 
@@ -255,11 +255,13 @@ class CheckoutController extends Controller
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $item['product']->id,
+                        'product_variant_id' => $item['variant'] ? $item['variant']->id : null,
                         'product_name' => $item['product']->name,
+                        'product_sku' => $item['product']->sku ?? 'SKU-' . $item['product']->id,
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['price'],
                         'total_price' => $item['price'] * $item['quantity'],
-                        'variant_id' => $item['variant'] ? $item['variant']->id : null,
+                        'options' => null,
                     ]);
                 }
 
@@ -274,8 +276,9 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.success')->with('orders', $orders);
 
         } catch (\Exception $e) {
+
             DB::rollBack();
-            return back()->with('error', 'An error occurred while processing your order. Please try again.');
+            return back()->with('error', $e->getMessage());
         }
     }
 
@@ -287,23 +290,23 @@ class CheckoutController extends Controller
         // Get vendor location (you may need to add vendor coordinates to your vendor model)
         // For now, using a simple calculation
         $baseShipping = 5.99;
-        
+
         // You can implement more complex distance-based calculations here
         // For example, using Haversine formula to calculate distance between coordinates
         // and then apply different rates based on distance zones
-        
+
         // Simple example: if coordinates are far from city center, add extra cost
         $cityCenterLat = 40.7128; // Example: New York City
         $cityCenterLng = -74.0060;
-        
+
         $distance = $this->calculateDistance($latitude, $longitude, $cityCenterLat, $cityCenterLng);
-        
+
         if ($distance > 50) { // More than 50 km from city center
             $baseShipping += 10.00; // Add extra shipping cost
         } elseif ($distance > 25) { // More than 25 km from city center
             $baseShipping += 5.00; // Add moderate shipping cost
         }
-        
+
         return $baseShipping;
     }
 
@@ -313,23 +316,23 @@ class CheckoutController extends Controller
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $earthRadius = 6371; // Earth's radius in kilometers
-        
+
         $latDelta = deg2rad($lat2 - $lat1);
         $lonDelta = deg2rad($lon2 - $lon1);
-        
+
         $a = sin($latDelta / 2) * sin($latDelta / 2) +
              cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
              sin($lonDelta / 2) * sin($lonDelta / 2);
-        
+
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-        
+
         return $earthRadius * $c;
     }
 
     public function success()
     {
         $orders = session('orders', []);
-        
+
         if (empty($orders)) {
             return redirect()->route('home');
         }
