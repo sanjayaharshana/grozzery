@@ -5,12 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Vendor;
+use App\Models\HomeSetting;
+use App\Models\Banner;
+use App\Models\Promotion;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function index()
     {
+        // Dynamic home settings
+        $heroSettings = [
+            'title' => HomeSetting::getValue('hero_title', 'Welcome to Grozzoery'),
+            'subtitle' => HomeSetting::getValue('hero_subtitle', 'Discover amazing products from trusted vendors'),
+            'button_text' => HomeSetting::getValue('hero_button_text', 'Shop Now'),
+            'button_url' => HomeSetting::getValue('hero_button_url', route('shop')),
+        ];
+
+        // Dynamic banners
+        $banners = Banner::active()
+            ->orderBy('sort_order')
+            ->get();
+
+        // Dynamic promotions
+        $promotions = Promotion::active()
+            ->orderBy('sort_order')
+            ->get();
+
+        // Section titles
+        $sectionTitles = [
+            'featured_title' => HomeSetting::getValue('featured_title', 'Featured Products'),
+            'bestseller_title' => HomeSetting::getValue('bestseller_title', 'Bestsellers'),
+            'categories_title' => HomeSetting::getValue('categories_title', 'Shop by Category'),
+            'vendors_title' => HomeSetting::getValue('vendors_title', 'Top Vendors'),
+        ];
+
+        // Products data
         $featuredProducts = Product::with(['vendor', 'category', 'images'])
             ->active()
             ->featured()
@@ -38,7 +68,16 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-        return view('home', compact('featuredProducts', 'bestsellerProducts', 'categories', 'vendors'));
+        return view('home', compact(
+            'heroSettings',
+            'banners',
+            'promotions',
+            'sectionTitles',
+            'featuredProducts',
+            'bestsellerProducts',
+            'categories',
+            'vendors'
+        ));
     }
 
     public function shop(Request $request)

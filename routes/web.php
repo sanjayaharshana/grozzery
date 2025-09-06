@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\HomeSettingsController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -67,3 +68,19 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Admin routes for dynamic content management
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/home-settings', [HomeSettingsController::class, 'index'])->name('home-settings');
+    Route::post('/home-settings', [HomeSettingsController::class, 'updateSettings'])->name('home-settings.update');
+    
+    // Banner management
+    Route::post('/banners', [HomeSettingsController::class, 'storeBanner'])->name('banners.store');
+    Route::put('/banners/{banner}', [HomeSettingsController::class, 'updateBanner'])->name('banners.update');
+    Route::delete('/banners/{banner}', [HomeSettingsController::class, 'deleteBanner'])->name('banners.delete');
+    
+    // Promotion management
+    Route::post('/promotions', [HomeSettingsController::class, 'storePromotion'])->name('promotions.store');
+    Route::put('/promotions/{promotion}', [HomeSettingsController::class, 'updatePromotion'])->name('promotions.update');
+    Route::delete('/promotions/{promotion}', [HomeSettingsController::class, 'deletePromotion'])->name('promotions.delete');
+});

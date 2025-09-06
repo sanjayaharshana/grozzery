@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-
+        // Run dynamic content seeder
+        $this->call([
+            EcommerceSeeder::class,
+            DynamicContentSeeder::class,
+        ]);
     }
 }

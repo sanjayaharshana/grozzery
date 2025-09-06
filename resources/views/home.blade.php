@@ -8,59 +8,87 @@
     <!-- Hero Section -->
     <div class="hero">
         <div class="text-center">
-            <h1>Welcome to Grozzoery</h1>
-            <p>Discover amazing products from trusted vendors</p>
-            <a href="{{ route('shop') }}" class="btn btn-primary">
-                Shop Now
+            <h1>{{ $heroSettings['title'] }}</h1>
+            <p>{{ $heroSettings['subtitle'] }}</p>
+            <a href="{{ $heroSettings['button_url'] }}" class="btn btn-primary">
+                {{ $heroSettings['button_text'] }}
             </a>
         </div>
     </div>
 
     <!-- Banner Section -->
+    @if($banners->count() > 0)
     <div class="banner-section">
         <div class="container">
             <div class="banner-grid">
-                <div class="banner-item banner-large">
+                @foreach($banners as $banner)
+                <div class="banner-item {{ $banner->type === 'flash_sale' ? 'banner-large' : '' }}" 
+                     style="{{ $banner->background_color ? 'background-color: ' . $banner->background_color . ';' : '' }} {{ $banner->text_color ? 'color: ' . $banner->text_color . ';' : '' }}">
                     <div class="banner-content">
-                        <h3>Flash Sale</h3>
-                        <p>Up to 70% Off</p>
-                        <span class="banner-timer" id="flash-sale-timer">23:59:59</span>
-                        <a href="{{ route('shop') }}?sale=flash" class="btn btn-light">Shop Now</a>
+                        <h3>{{ $banner->title }}</h3>
+                        @if($banner->description)
+                        <p>{{ $banner->description }}</p>
+                        @endif
+                        @if($banner->type === 'flash_sale' && $banner->ends_at)
+                        <span class="banner-timer" data-end-time="{{ $banner->ends_at->timestamp }}">00:00:00</span>
+                        @endif
+                        @if($banner->button_text && $banner->button_url)
+                        <a href="{{ $banner->button_url }}" class="btn btn-light">{{ $banner->button_text }}</a>
+                        @endif
                     </div>
                     <div class="banner-image">
+                        @if($banner->image)
+                        <img src="{{ asset('storage/' . $banner->image) }}" alt="{{ $banner->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        @elseif($banner->icon)
+                        <i class="{{ $banner->icon }}"></i>
+                        @else
                         <i class="fas fa-fire"></i>
+                        @endif
                     </div>
                 </div>
-                
-                <div class="banner-item">
-                    <div class="banner-content">
-                        <h4>New Arrivals</h4>
-                        <p>Fresh Products Daily</p>
-                        <a href="{{ route('shop') }}?sort=newest" class="btn btn-sm">Explore</a>
-                    </div>
-                    <div class="banner-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-                
-                <div class="banner-item">
-                    <div class="banner-content">
-                        <h4>Free Shipping</h4>
-                        <p>On Orders Over $50</p>
-                        <a href="{{ route('shop') }}" class="btn btn-sm">Shop Now</a>
-                    </div>
-                    <div class="banner-icon">
-                        <i class="fas fa-truck"></i>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </div>
+    @endif
+
+    <!-- Promotions Section -->
+    @if($promotions->count() > 0)
+    <div class="promotions-section mb-6">
+        <div class="container">
+            <div class="grid grid-cols-1 grid-cols-2 grid-cols-3">
+                @foreach($promotions as $promotion)
+                <div class="promotion-card">
+                    <div class="promotion-icon">
+                        @if($promotion->icon)
+                        <i class="{{ $promotion->icon }}"></i>
+                        @else
+                        <i class="fas fa-gift"></i>
+                        @endif
+                    </div>
+                    <div class="promotion-content">
+                        <h4>{{ $promotion->title }}</h4>
+                        @if($promotion->description)
+                        <p>{{ $promotion->description }}</p>
+                        @endif
+                        @if($promotion->minimum_order)
+                        <small>Min. order: ${{ number_format($promotion->minimum_order, 2) }}</small>
+                        @endif
+                        @if($promotion->button_text && $promotion->button_url)
+                        <a href="{{ $promotion->button_url }}" class="btn btn-sm">{{ $promotion->button_text }}</a>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Featured Products -->
     @if($featuredProducts->count() > 0)
     <section class="mb-6">
-        <h2>Featured Products</h2>
+        <h2>{{ $sectionTitles['featured_title'] }}</h2>
         <div class="grid grid-cols-1 grid-cols-2 grid-cols-4">
             @foreach($featuredProducts as $product)
             <div class="product-card" onclick="window.location.href='{{ route('product', $product->slug) }}'" style="cursor: pointer;">
@@ -95,7 +123,7 @@
     <!-- Bestseller Products -->
     @if($bestsellerProducts->count() > 0)
     <section class="mb-6">
-        <h2>Bestsellers</h2>
+        <h2>{{ $sectionTitles['bestseller_title'] }}</h2>
         <div class="grid grid-cols-1 grid-cols-2 grid-cols-4">
             @foreach($bestsellerProducts as $product)
             <div class="product-card" onclick="window.location.href='{{ route('product', $product->slug) }}'" style="cursor: pointer;">
@@ -130,7 +158,7 @@
     <!-- Categories -->
     @if($categories->count() > 0)
     <section class="mb-6">
-        <h2>Shop by Category</h2>
+        <h2>{{ $sectionTitles['categories_title'] }}</h2>
         <div class="grid grid-cols-1 grid-cols-2 grid-cols-3">
             @foreach($categories as $category)
             <div class="card">
@@ -160,7 +188,7 @@
     <!-- Top Vendors -->
     @if($vendors->count() > 0)
     <section class="mb-6">
-        <h2>Top Vendors</h2>
+        <h2>{{ $sectionTitles['vendors_title'] }}</h2>
         <div class="grid grid-cols-1 grid-cols-2 grid-cols-3">
             @foreach($vendors as $vendor)
             <div class="card">
@@ -201,4 +229,37 @@
     </section>
     @endif
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Countdown timer for flash sale banners
+    const timers = document.querySelectorAll('.banner-timer[data-end-time]');
+    
+    timers.forEach(function(timer) {
+        const endTime = parseInt(timer.getAttribute('data-end-time'));
+        
+        function updateTimer() {
+            const now = Math.floor(Date.now() / 1000);
+            const timeLeft = endTime - now;
+            
+            if (timeLeft <= 0) {
+                timer.textContent = '00:00:00';
+                return;
+            }
+            
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            const seconds = timeLeft % 60;
+            
+            timer.textContent = 
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+        }
+        
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    });
+});
+</script>
 @endsection
