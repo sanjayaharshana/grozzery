@@ -83,8 +83,8 @@
                     <a href="{{ route('checkout.index') }}" class="checkout-btn">
                         Proceed to Checkout
                     </a>
-                    <a href="{{ route('shop') }}" class="continue-shopping">
-                        Continue Shopping
+                    <a href="{{ route('marketplace') }}" class="continue-browsing">
+                        Continue Browsing
                     </a>
                 </div>
             </div>
@@ -97,8 +97,8 @@
             </div>
             <h2>Your cart is empty</h2>
             <p>Looks like you haven't added any products to your cart yet.</p>
-            <a href="{{ route('shop') }}" class="btn btn-primary">
-                Start Shopping
+            <a href="{{ route('marketplace') }}" class="btn btn-primary">
+                Start Browsing
             </a>
         </div>
         @endif

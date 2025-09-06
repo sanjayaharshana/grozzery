@@ -8,6 +8,21 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    
+    <!-- Immediate Preloader (shows before JavaScript loads) -->
+    <div id="immediate-preloader" class="page-preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">
+                <h2>Grozzoery</h2>
+            </div>
+            <div class="preloader-spinner">
+                <div class="spinner"></div>
+            </div>
+            <div class="preloader-text">
+                <p>Loading amazing products...</p>
+            </div>
+        </div>
+    </div>
 </head>
 <body>
     <!-- Top Bar -->
@@ -46,7 +61,7 @@
                                 {{ $category->name }}
                             </a>
                         @endforeach
-                        <a href="{{ route('shop') }}" class="category-item view-all">
+                        <a href="{{ route('marketplace') }}" class="category-item view-all">
                             <i class="fas fa-th-large"></i>
                             View All Categories
                         </a>
@@ -56,7 +71,7 @@
 
             <!-- Search Bar -->
             <div class="search-container">
-                <form class="search-form" action="{{ route('shop') }}" method="GET">
+                <form class="search-form" action="{{ route('marketplace') }}" method="GET">
                     <div class="search-input-group">
                         <select name="category" class="search-category">
                             <option value="">All Categories</option>
@@ -142,14 +157,14 @@
     <div class="category-nav">
         <div class="container">
             <ul class="category-list">
-                <li><a href="{{ route('shop') }}?category=electronics"><i class="fas fa-mobile-alt"></i> Electronics</a></li>
-                <li><a href="{{ route('shop') }}?category=fashion"><i class="fas fa-tshirt"></i> Fashion</a></li>
-                <li><a href="{{ route('shop') }}?category=home"><i class="fas fa-home"></i> Home & Garden</a></li>
-                <li><a href="{{ route('shop') }}?category=sports"><i class="fas fa-futbol"></i> Sports</a></li>
-                <li><a href="{{ route('shop') }}?category=beauty"><i class="fas fa-spa"></i> Beauty</a></li>
-                <li><a href="{{ route('shop') }}?category=toys"><i class="fas fa-gamepad"></i> Toys & Games</a></li>
-                <li><a href="{{ route('shop') }}?category=automotive"><i class="fas fa-car"></i> Automotive</a></li>
-                <li><a href="{{ route('shop') }}?category=health"><i class="fas fa-heartbeat"></i> Health</a></li>
+                <li><a href="{{ route('marketplace') }}?category=electronics"><i class="fas fa-mobile-alt"></i> Electronics</a></li>
+                <li><a href="{{ route('marketplace') }}?category=fashion"><i class="fas fa-tshirt"></i> Fashion</a></li>
+                <li><a href="{{ route('marketplace') }}?category=home"><i class="fas fa-home"></i> Home & Garden</a></li>
+                <li><a href="{{ route('marketplace') }}?category=sports"><i class="fas fa-futbol"></i> Sports</a></li>
+                <li><a href="{{ route('marketplace') }}?category=beauty"><i class="fas fa-spa"></i> Beauty</a></li>
+                <li><a href="{{ route('marketplace') }}?category=toys"><i class="fas fa-gamepad"></i> Toys & Games</a></li>
+                <li><a href="{{ route('marketplace') }}?category=automotive"><i class="fas fa-car"></i> Automotive</a></li>
+                <li><a href="{{ route('marketplace') }}?category=health"><i class="fas fa-heartbeat"></i> Health</a></li>
             </ul>
         </div>
     </div>

@@ -136,8 +136,8 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="{{ route('home') }}" class="continue-shopping-btn">
-                Continue Shopping
+            <a href="{{ route('home') }}" class="continue-browsing-btn">
+                Continue Browsing
             </a>
             <p class="confirmation-note">
                 You will receive an email confirmation shortly. 

@@ -11,7 +11,7 @@ use App\Http\Controllers\Admin\HomeSettingsController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/shop', [HomeController::class, 'shop'])->name('shop');
+Route::get('/marketplace', [HomeController::class, 'marketplace'])->name('marketplace');
 Route::get('/product/{slug}', [HomeController::class, 'product'])->name('product');
 Route::get('/category/{slug}', [HomeController::class, 'category'])->name('category');
 Route::get('/vendor/{id}', [HomeController::class, 'vendor'])->name('vendor');

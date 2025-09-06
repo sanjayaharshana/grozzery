@@ -18,8 +18,8 @@ class HomeController extends Controller
         $heroSettings = [
             'title' => HomeSetting::getValue('hero_title', 'Welcome to Grozzoery'),
             'subtitle' => HomeSetting::getValue('hero_subtitle', 'Discover amazing products from trusted vendors'),
-            'button_text' => HomeSetting::getValue('hero_button_text', 'Shop Now'),
-            'button_url' => HomeSetting::getValue('hero_button_url', route('shop')),
+            'button_text' => HomeSetting::getValue('hero_button_text', 'Browse Marketplace'),
+            'button_url' => HomeSetting::getValue('hero_button_url', route('marketplace')),
         ];
 
         // Dynamic banners
@@ -36,7 +36,7 @@ class HomeController extends Controller
         $sectionTitles = [
             'featured_title' => HomeSetting::getValue('featured_title', 'Featured Products'),
             'bestseller_title' => HomeSetting::getValue('bestseller_title', 'Bestsellers'),
-            'categories_title' => HomeSetting::getValue('categories_title', 'Shop by Category'),
+            'categories_title' => HomeSetting::getValue('categories_title', 'Browse by Category'),
             'vendors_title' => HomeSetting::getValue('vendors_title', 'Top Vendors'),
         ];
 
@@ -80,18 +80,18 @@ class HomeController extends Controller
         ));
     }
 
-    public function shop(Request $request)
+    public function marketplace(Request $request)
     {
         $query = Product::with(['vendor', 'category', 'images'])
             ->active();
 
         // Filter by category
-        if ($request->has('category')) {
+        if ($request->has('category') && !empty($request->category)) {
             $query->byCategory($request->category);
         }
 
         // Filter by vendor
-        if ($request->has('vendor')) {
+        if ($request->has('vendor') && !empty($request->vendor)) {
             $query->byVendor($request->vendor);
         }
 
@@ -104,12 +104,12 @@ class HomeController extends Controller
         }
 
         // Search by name or description
-        if ($request->has('search')) {
-            $search = $request->search;
+        if ($request->has('search') && !empty($request->search)) {
+            $search = strtolower($request->search);
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('short_description', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ["%{$search}%"])
+                  ->orWhereRaw('LOWER(short_description) LIKE ?', ["%{$search}%"]);
             });
         }
 
@@ -137,7 +137,7 @@ class HomeController extends Controller
         $categories = Category::active()->root()->ordered()->get();
         $vendors = Vendor::where('status', 'approved')->get();
 
-        return view('shop', compact('products', 'categories', 'vendors'));
+        return view('marketplace', compact('products', 'categories', 'vendors'));
     }
 
     public function product($slug)

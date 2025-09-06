@@ -40,13 +40,13 @@
                     <div>
                         <label for="hero_button_text" class="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
                         <input type="text" id="hero_button_text" name="hero_button_text" 
-                               value="{{ HomeSetting::getValue('hero_button_text', 'Shop Now') }}"
+                               value="{{ HomeSetting::getValue('hero_button_text', 'Browse Marketplace') }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label for="hero_button_url" class="block text-sm font-medium text-gray-700 mb-2">Button URL</label>
                         <input type="text" id="hero_button_url" name="hero_button_url" 
-                               value="{{ HomeSetting::getValue('hero_button_url', '/shop') }}"
+                               value="{{ HomeSetting::getValue('hero_button_url', '/marketplace') }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                     <div>
                         <label for="categories_title" class="block text-sm font-medium text-gray-700 mb-2">Categories Title</label>
                         <input type="text" id="categories_title" name="categories_title" 
-                               value="{{ HomeSetting::getValue('categories_title', 'Shop by Category') }}"
+                               value="{{ HomeSetting::getValue('categories_title', 'Browse by Category') }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>

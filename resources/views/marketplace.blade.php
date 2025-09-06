@@ -1,10 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'Shop - Grozzoery')
+@section('title', 'Marketplace - Grozzoery')
 
 @section('content')
 <div class="container py-8">
-    <h1 class="text-center mb-6">Shop</h1>
+    <h1 class="text-center mb-6">Marketplace</h1>
+    <p class="text-center text-gray-600 mb-8">Discover amazing products from our trusted vendors</p>
+    
+    @if(request()->has('search') && !empty(request()->search))
+        <div class="search-results-info mb-4">
+            <p class="text-center">
+                Search results for: <strong>"{{ request()->search }}"</strong>
+                @if(request()->has('category') && !empty(request()->category))
+                    in category: <strong>{{ $categories->where('id', request()->category)->first()->name ?? 'Unknown' }}</strong>
+                @endif
+                ({{ $products->total() }} results found)
+            </p>
+        </div>
+    @endif
     
     @if($products->count() > 0)
     <div class="grid grid-cols-1 grid-cols-2 grid-cols-3">
