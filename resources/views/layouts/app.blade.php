@@ -73,12 +73,6 @@
             <div class="search-container">
                 <form class="search-form" action="{{ route('marketplace') }}" method="GET">
                     <div class="search-input-group">
-                        <select name="category" class="search-category">
-                            <option value="">All Categories</option>
-                            @foreach($categories ?? [] as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
-                        </select>
                         <input type="text" name="search" placeholder="What are you looking for today?" class="search-input">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-search"></i>
