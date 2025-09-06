@@ -73,6 +73,15 @@ class CartController extends Controller
 
         Session::put('cart', $cart);
 
+        // Return JSON response for AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added to cart successfully!',
+                'cart_count' => array_sum(array_column($cart, 'quantity'))
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Product added to cart successfully!');
     }
 
@@ -95,7 +104,7 @@ class CartController extends Controller
         return redirect()->back()->with('error', 'Item not found in cart.');
     }
 
-    public function remove($cartKey)
+    public function remove(Request $request, $cartKey)
     {
         $cart = Session::get('cart', []);
         
@@ -103,7 +112,24 @@ class CartController extends Controller
             unset($cart[$cartKey]);
             Session::put('cart', $cart);
             
+            // Return JSON response for AJAX requests
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Item removed from cart successfully!',
+                    'cart_count' => array_sum(array_column($cart, 'quantity'))
+                ]);
+            }
+            
             return redirect()->back()->with('success', 'Item removed from cart successfully!');
+        }
+
+        // Return JSON response for AJAX requests
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Item not found in cart.'
+            ], 404);
         }
 
         return redirect()->back()->with('error', 'Item not found in cart.');
@@ -133,7 +159,7 @@ class CartController extends Controller
         $cartItems = [];
         $total = 0;
 
-        foreach ($cart as $item) {
+        foreach ($cart as $cartKey => $item) {
             $product = Product::with(['vendor', 'images'])->find($item['product_id']);
             if ($product) {
                 $variant = null;
@@ -152,6 +178,7 @@ class CartController extends Controller
                     'quantity' => $item['quantity'],
                     'price' => number_format($price, 2),
                     'total' => number_format($itemTotal, 2),
+                    'cart_key' => $cartKey,
                 ];
             }
         }

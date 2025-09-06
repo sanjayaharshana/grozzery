@@ -26,6 +26,10 @@ $('.add-to-cart, .add-to-cart-btn').on('click', function(e) {
     .done(function(response) {
         showAlert('Product added to cart successfully!', 'success');
         updateCartCount();
+        updateCartPreview();
+        
+        // Trigger custom event for cart update
+        $(document).trigger('cart:updated');
 
         // Reset button state
         $btn.html(originalText);
@@ -326,6 +330,11 @@ $('.wishlist-btn').on('click', function(e) {
                                     <div class="cart-preview-quantity">Qty: ${item.quantity}</div>
                                 </div>
                                 <div class="cart-preview-price">$${item.price}</div>
+                                <div class="cart-preview-remove">
+                                    <button class="remove-from-cart-btn" data-cart-key="${item.cart_key}" title="Remove from cart" aria-label="Remove ${item.name} from cart">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
                         `;
                     });
@@ -336,8 +345,8 @@ $('.wishlist-btn').on('click', function(e) {
                     totalAmount.text('$0.00');
                 }
             })
-            .fail(function() {
-                console.error('Failed to fetch cart preview');
+            .fail(function(xhr) {
+                console.error('Failed to fetch cart preview:', xhr);
             });
     }
     
@@ -348,6 +357,56 @@ $('.wishlist-btn').on('click', function(e) {
     $(document).on('cart:updated', function() {
         updateCartPreview();
         updateCartCount();
+    });
+    
+    // Update cart preview when hovering over cart dropdown
+    $('.cart-dropdown').on('mouseenter', function() {
+        updateCartPreview();
+    });
+    
+    // Handle remove from cart button clicks
+    $(document).on('click', '.remove-from-cart-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var cartKey = $(this).data('cart-key');
+        var $btn = $(this);
+        var $item = $btn.closest('.cart-preview-item');
+        
+        // Show loading state
+        $btn.html('<i class="fas fa-spinner fa-spin"></i>');
+        $btn.prop('disabled', true);
+        
+        $.ajax({
+            url: '/cart/remove/' + cartKey,
+            type: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        })
+        .done(function(response) {
+            if (response.success) {
+                showAlert('Item removed from cart successfully!', 'success');
+                updateCartCount();
+                updateCartPreview();
+                $(document).trigger('cart:updated');
+            } else {
+                showAlert(response.message || 'Failed to remove item from cart.', 'error');
+                $btn.html('<i class="fas fa-times"></i>');
+                $btn.prop('disabled', false);
+            }
+        })
+        .fail(function(xhr) {
+            var error = 'An error occurred while removing item from cart.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                error = xhr.responseJSON.message;
+            }
+            showAlert(error, 'error');
+            
+            // Reset button state
+            $btn.html('<i class="fas fa-times"></i>');
+            $btn.prop('disabled', false);
+        });
     });
     
     // Update cart count
