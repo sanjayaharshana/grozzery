@@ -1,21 +1,28 @@
-// Page Preloader functionality - Hide when page is fully loaded
+// Optimized preloader functionality - Hide faster for better UX
 $(document).ready(function() {
     console.log('Document ready - preloader already showing from HTML');
-});
-
-$(window).on('load', function() {
-    console.log('Window loaded - hiding preloader');
     
-    // Hide preloader when page is fully loaded
+    // Hide preloader much faster - after DOM is ready
     setTimeout(function() {
-        console.log('Hiding preloader...');
+        console.log('Hiding preloader after DOM ready...');
         $('#immediate-preloader').addClass('fade-out');
         setTimeout(function() {
             $('#immediate-preloader').remove();
             console.log('Preloader removed');
-        }, 500); // Remove after fade animation completes
-    }, 1000); // Show for at least 1 second to ensure it's visible
+        }, 200); // Faster fade out
+    }, 500); // Show for only 500ms instead of 1000ms
 });
+
+// Fallback: Hide preloader if page takes too long to load
+setTimeout(function() {
+    if ($('#immediate-preloader').length) {
+        console.log('Force hiding preloader after timeout');
+        $('#immediate-preloader').addClass('fade-out');
+        setTimeout(function() {
+            $('#immediate-preloader').remove();
+        }, 200);
+    }
+}, 1500); // Maximum 1.5 seconds
 
 $(document).ready(function() {
     // CSRF token setup for AJAX requests
