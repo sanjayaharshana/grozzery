@@ -10,6 +10,9 @@
             <p>Complete your order by selecting your delivery option and payment method</p>
         </div>
 
+        <!-- Order Process Step Indicator -->
+        <x-step-indicator :current-step="2" />
+
         <form action="{{ route('checkout.store') }}" method="POST" class="checkout-form">
             @csrf
 

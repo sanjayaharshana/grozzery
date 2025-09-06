@@ -28,12 +28,16 @@ Route::get('/cart/preview', [CartController::class, 'preview'])->name('cart.prev
 
 // Checkout routes (require authentication)
 Route::middleware('auth')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::get('/checkout/step/{step}', [CheckoutController::class, 'show'])->name('checkout.step');
+    Route::post('/checkout/step/{step}', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+    
+    // Redirect /checkout to step 1
+    Route::get('/checkout', function () {
+        return redirect()->route('checkout.step', 1);
+    })->name('checkout.index');
 
-// Address Management Routes
-Route::middleware(['auth'])->group(function () {
+    // Address Management Routes
     Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
     Route::get('/addresses/create', [AddressController::class, 'create'])->name('addresses.create');
     Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
@@ -41,7 +45,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
     Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
     Route::post('/addresses/{address}/default', [AddressController::class, 'setDefault'])->name('addresses.default');
-});
 });
 
 // Vendor routes (require authentication and vendor role)

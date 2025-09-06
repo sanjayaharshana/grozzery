@@ -14,6 +14,47 @@
             <p>Thank you for your purchase. Your order has been confirmed.</p>
         </div>
 
+        <!-- Order Process Step Indicator -->
+        <div class="order-process-steps" style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; padding: 0.75rem; margin-bottom: 1rem;">
+            <div class="step-indicator" style="display: flex; align-items: center; justify-content: space-between; max-width: 800px; margin: 0 auto; padding: 0 1rem;">
+                <div class="step completed" data-step="1" style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                    <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; margin-right: 0.5rem; transition: all 0.3s ease; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="step-content" style="text-align: left;">
+                        <h4 style="font-size: 0.8rem; font-weight: 600; color: #10b981; margin: 0; line-height: 1.2;">Review Cart</h4>
+                    </div>
+                </div>
+                
+                <div class="step completed" data-step="2" style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                    <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; margin-right: 0.5rem; transition: all 0.3s ease; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="step-content" style="text-align: left;">
+                        <h4 style="font-size: 0.8rem; font-weight: 600; color: #10b981; margin: 0; line-height: 1.2;">Delivery</h4>
+                    </div>
+                </div>
+                
+                <div class="step completed" data-step="3" style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                    <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; margin-right: 0.5rem; transition: all 0.3s ease; border: 2px solid #10b981; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="step-content" style="text-align: left;">
+                        <h4 style="font-size: 0.8rem; font-weight: 600; color: #10b981; margin: 0; line-height: 1.2;">Payment</h4>
+                    </div>
+                </div>
+                
+                <div class="step active" data-step="4" style="display: flex; align-items: center; flex: 1; min-width: 0;">
+                    <div class="step-circle" style="width: 32px; height: 32px; border-radius: 50%; background: #ff4747; color: white; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; margin-right: 0.5rem; transition: all 0.3s ease; border: 2px solid #ff4747; box-shadow: 0 2px 8px rgba(255, 71, 71, 0.3);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content" style="text-align: left;">
+                        <h4 style="font-size: 0.8rem; font-weight: 600; color: #ff4747; margin: 0; line-height: 1.2;">Confirmation</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Order Summary -->
         <div class="order-summary-card">
             <h2>Order Summary</h2>

@@ -11,6 +11,9 @@
             <p>Review your items and proceed to checkout</p>
         </div>
         
+        <!-- Order Process Step Indicator -->
+        <x-step-indicator :current-step="1" />
+        
         @if(count($cartItems) > 0)
         <div class="cart-content">
             <!-- Cart Items -->

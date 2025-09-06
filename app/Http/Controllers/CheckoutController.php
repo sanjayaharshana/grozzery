@@ -18,7 +18,7 @@ class CheckoutController extends Controller
         $this->middleware('auth');
     }
 
-    public function index()
+    public function show($step)
     {
         $user = Auth::user();
         $cartItems = session('cart', []);
@@ -27,25 +27,21 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
 
-        // Process cart items to ensure they have all required fields
+        // Process cart items
         $processedCartItems = [];
         $subtotal = 0;
 
         foreach ($cartItems as $cartKey => $item) {
-            // Get fresh product data
             $product = Product::find($item['product_id']);
             if (!$product) continue;
 
-            // Get variant if exists
             $variant = null;
             if (isset($item['variant_id']) && $item['variant_id']) {
                 $variant = ProductVariant::find($item['variant_id']);
             }
 
-            // Calculate price
             $price = $variant ? $variant->price : $product->price;
 
-            // Create processed item
             $processedItem = [
                 'cart_key' => $cartKey,
                 'product_id' => $product->id,
@@ -65,45 +61,31 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
 
-        // Get user's addresses
-        $addresses = $user->addresses()->orderBy('is_default', 'desc')->get();
-
         // Calculate totals
-        $shipping = 5.99; // Fixed shipping cost
-        $tax = $subtotal * 0.08; // 8% tax
+        $shipping = 5.99;
+        $tax = $subtotal * 0.08;
         $total = $subtotal + $shipping + $tax;
 
-        return view('checkout.index', compact('processedCartItems', 'subtotal', 'shipping', 'tax', 'total', 'addresses'));
+        // Get checkout data from session
+        $checkoutData = session('checkout_data', []);
+
+        // Get user's addresses for delivery step
+        $addresses = $user->addresses()->orderBy('is_default', 'desc')->get();
+
+        return view('checkout.step-' . $step, compact(
+            'step', 
+            'processedCartItems', 
+            'subtotal', 
+            'shipping', 
+            'tax', 
+            'total', 
+            'checkoutData',
+            'addresses'
+        ));
     }
 
-    public function store(Request $request)
+    public function process(Request $request, $step)
     {
-        // Validate delivery type and related fields
-        $request->validate([
-            'delivery_type' => 'required|in:location_based,address_based',
-            'payment_method' => 'required|in:credit_card,paypal,cash_on_delivery',
-        ]);
-
-        // Additional validation based on delivery type
-        if ($request->delivery_type === 'address_based') {
-            $request->validate([
-                'shipping_address_id' => 'required|exists:addresses,id',
-                'billing_address_id' => 'required|exists:addresses,id',
-            ]);
-        } else {
-            $request->validate([
-                'delivery_latitude' => 'required|numeric|between:-90,90',
-                'delivery_longitude' => 'required|numeric|between:-180,180',
-                'delivery_address' => 'required|string|max:500',
-                'delivery_city' => 'required|string|max:100',
-                'delivery_state' => 'required|string|max:100',
-                'delivery_zip_code' => 'required|string|max:20',
-                'delivery_country' => 'required|string|max:100',
-                'delivery_phone' => 'required|string|max:20',
-                'delivery_recipient_name' => 'required|string|max:255',
-            ]);
-        }
-
         $user = Auth::user();
         $cartItems = session('cart', []);
 
@@ -111,23 +93,131 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
         }
 
-        // Process cart items to ensure they have all required fields
+        // Get existing checkout data
+        $checkoutData = session('checkout_data', []);
+
+        switch ($step) {
+            case 1:
+                // Step 1: Review Cart - handle quantity updates
+                if ($request->has('update_quantity')) {
+                    $cartKey = $request->cart_key;
+                    $quantity = $request->quantity;
+                    
+                    if ($quantity <= 0) {
+                        unset($cartItems[$cartKey]);
+                    } else {
+                        $cartItems[$cartKey]['quantity'] = $quantity;
+                    }
+                    
+                    session(['cart' => $cartItems]);
+                    return redirect()->route('checkout.step', 1);
+                }
+                
+                if ($request->has('remove_item')) {
+                    $cartKey = $request->cart_key;
+                    unset($cartItems[$cartKey]);
+                    session(['cart' => $cartItems]);
+                    return redirect()->route('checkout.step', 1);
+                }
+                
+                // Proceed to step 2
+                return redirect()->route('checkout.step', 2);
+
+            case 2:
+                // Step 2: Delivery
+                $request->validate([
+                    'delivery_type' => 'required|in:address_delivery,location_delivery',
+                ]);
+
+                if ($request->delivery_type === 'address_delivery') {
+                    $request->validate([
+                        'shipping_address_id' => 'required|exists:addresses,id',
+                    ]);
+                    
+                    $address = $user->addresses()->findOrFail($request->shipping_address_id);
+                    $checkoutData['delivery_type'] = 'address_delivery';
+                    $checkoutData['shipping_address'] = [
+                        'first_name' => $address->first_name,
+                        'last_name' => $address->last_name,
+                        'address' => $address->address_line_1,
+                        'address_line_2' => $address->address_line_2,
+                        'city' => $address->city,
+                        'state' => $address->state,
+                        'zip_code' => $address->zip_code,
+                        'country' => $address->country,
+                        'phone' => $address->phone,
+                        'latitude' => $address->latitude,
+                        'longitude' => $address->longitude,
+                    ];
+                } else {
+                    $request->validate([
+                        'delivery_latitude' => 'required|numeric|between:-90,90',
+                        'delivery_longitude' => 'required|numeric|between:-180,180',
+                        'delivery_address' => 'required|string|max:500',
+                        'delivery_city' => 'required|string|max:100',
+                        'delivery_state' => 'required|string|max:100',
+                        'delivery_zip_code' => 'required|string|max:20',
+                        'delivery_country' => 'required|string|max:100',
+                        'delivery_phone' => 'required|string|max:20',
+                        'delivery_recipient_name' => 'required|string|max:255',
+                    ]);
+                    
+                    $checkoutData['delivery_type'] = 'location_delivery';
+                    $checkoutData['shipping_address'] = [
+                        'first_name' => $request->delivery_recipient_name,
+                        'last_name' => '',
+                        'address' => $request->delivery_address,
+                        'address_line_2' => '',
+                        'city' => $request->delivery_city,
+                        'state' => $request->delivery_state,
+                        'zip_code' => $request->delivery_zip_code,
+                        'country' => $request->delivery_country,
+                        'phone' => $request->delivery_phone,
+                        'latitude' => $request->delivery_latitude,
+                        'longitude' => $request->delivery_longitude,
+                    ];
+                }
+                
+                session(['checkout_data' => $checkoutData]);
+                return redirect()->route('checkout.step', 3);
+
+            case 3:
+                // Step 3: Payment
+                $request->validate([
+                    'payment_method' => 'required|in:card_payment,credit_card,employee_id',
+                ]);
+                
+                $checkoutData['payment_method'] = $request->payment_method;
+                session(['checkout_data' => $checkoutData]);
+                return redirect()->route('checkout.step', 4);
+
+            case 4:
+                // Step 4: Confirmation - Create order
+                return $this->createOrder($checkoutData);
+
+            default:
+                return redirect()->route('checkout.step', 1);
+        }
+    }
+
+    private function createOrder($checkoutData)
+    {
+        $user = Auth::user();
+        $cartItems = session('cart', []);
+
+        // Process cart items
         $processedCartItems = [];
         foreach ($cartItems as $cartKey => $item) {
-            // Get fresh product data
             $product = Product::find($item['product_id']);
             if (!$product) continue;
 
-            // Get variant if exists
             $variant = null;
             if (isset($item['variant_id']) && $item['variant_id']) {
                 $variant = ProductVariant::find($item['variant_id']);
             }
 
-            // Calculate price
             $price = $variant ? $variant->price : $product->price;
 
-            // Create processed item
             $processedItem = [
                 'cart_key' => $cartKey,
                 'product_id' => $product->id,
@@ -140,63 +230,6 @@ class CheckoutController extends Controller
             ];
 
             $processedCartItems[] = $processedItem;
-        }
-
-        if (empty($processedCartItems)) {
-            return redirect()->route('cart.index')->with('error', 'Your cart is empty!');
-        }
-
-        // Prepare shipping and billing addresses based on delivery type
-        if ($request->delivery_type === 'address_based') {
-            // Verify address ownership
-            $shippingAddress = $user->addresses()->findOrFail($request->shipping_address_id);
-            $billingAddress = $user->addresses()->findOrFail($request->billing_address_id);
-
-            $shippingAddressData = [
-                'first_name' => $shippingAddress->first_name,
-                'last_name' => $shippingAddress->last_name,
-                'address' => $shippingAddress->address_line_1,
-                'address_line_2' => $shippingAddress->address_line_2,
-                'city' => $shippingAddress->city,
-                'state' => $shippingAddress->state,
-                'zip_code' => $shippingAddress->zip_code,
-                'country' => $shippingAddress->country,
-                'phone' => $shippingAddress->phone,
-                'latitude' => $shippingAddress->latitude,
-                'longitude' => $shippingAddress->longitude,
-            ];
-
-            $billingAddressData = [
-                'first_name' => $billingAddress->first_name,
-                'last_name' => $billingAddress->last_name,
-                'address' => $billingAddress->address_line_1,
-                'address_line_2' => $billingAddress->address_line_2,
-                'city' => $billingAddress->city,
-                'state' => $billingAddress->state,
-                'zip_code' => $billingAddress->zip_code,
-                'country' => $billingAddress->country,
-                'phone' => $billingAddress->phone,
-                'latitude' => $billingAddress->latitude,
-                'longitude' => $billingAddress->longitude,
-            ];
-        } else {
-            // Location-based delivery - use provided coordinates and address
-            $shippingAddressData = [
-                'first_name' => $request->delivery_recipient_name,
-                'last_name' => '',
-                'address' => $request->delivery_address,
-                'address_line_2' => '',
-                'city' => $request->delivery_city,
-                'state' => $request->delivery_state,
-                'zip_code' => $request->delivery_zip_code,
-                'country' => $request->delivery_country,
-                'phone' => $request->delivery_phone,
-                'latitude' => $request->delivery_latitude,
-                'longitude' => $request->delivery_longitude,
-            ];
-
-            // For location-based delivery, billing address is same as shipping
-            $billingAddressData = $shippingAddressData;
         }
 
         // Group items by vendor
@@ -223,14 +256,18 @@ class CheckoutController extends Controller
                     $subtotal += $item['price'] * $item['quantity'];
                 }
 
-                // Calculate shipping based on delivery type and distance
-                if ($request->delivery_type === 'location_based') {
-                    $shipping = $this->calculateLocationBasedShipping($request->delivery_latitude, $request->delivery_longitude, $vendorId);
+                // Calculate shipping
+                if ($checkoutData['delivery_type'] === 'location_delivery') {
+                    $shipping = $this->calculateLocationBasedShipping(
+                        $checkoutData['shipping_address']['latitude'], 
+                        $checkoutData['shipping_address']['longitude'], 
+                        $vendorId
+                    );
                 } else {
-                    $shipping = 5.99; // Fixed shipping cost for address-based delivery
+                    $shipping = 5.99;
                 }
 
-                $tax = $subtotal * 0.08; // 8% tax
+                $tax = $subtotal * 0.08;
                 $total = $subtotal + $shipping + $tax;
 
                 // Create order
@@ -240,14 +277,14 @@ class CheckoutController extends Controller
                     'order_number' => 'ORD-' . strtoupper(Str::random(8)),
                     'status' => 'pending',
                     'payment_status' => 'pending',
-                    'payment_method' => $request->payment_method,
-                    'delivery_type' => $request->delivery_type,
+                    'payment_method' => $checkoutData['payment_method'],
+                    'delivery_type' => $checkoutData['delivery_type'],
                     'subtotal' => $subtotal,
                     'shipping_amount' => $shipping,
                     'tax_amount' => $tax,
                     'total_amount' => $total,
-                    'shipping_address' => $shippingAddressData,
-                    'billing_address' => $billingAddressData,
+                    'shipping_address' => $checkoutData['shipping_address'],
+                    'billing_address' => $checkoutData['shipping_address'], // Same as shipping for now
                 ]);
 
                 // Create order items
@@ -268,15 +305,15 @@ class CheckoutController extends Controller
                 $orders[] = $order;
             }
 
-            // Clear cart
+            // Clear cart and checkout data
             session()->forget('cart');
+            session()->forget('checkout_data');
 
             DB::commit();
 
             return redirect()->route('checkout.success')->with('orders', $orders);
 
         } catch (\Exception $e) {
-
             DB::rollBack();
             return back()->with('error', $e->getMessage());
         }
